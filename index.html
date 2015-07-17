@@ -144,6 +144,69 @@
           
           
             
+              <a class="post-title-link" href="/2015/07/17/gerrit使用入门（常用操作）/" itemprop="url">
+                gerrit使用入门（常用操作）
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-07-17T18:01:02+08:00" content="2015-07-17">
+            2015-07-17
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的评审流程</p>
+<h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置</p>
+<h3 id="步骤">步骤</h3></span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
               <a class="post-title-link" href="/2015/07/17/给SVN用户看的GIT使用入门/" itemprop="url">
                 给SVN用户看的GIT使用入门
               </a>
@@ -181,7 +244,8 @@
 <p><a href="http://www.ibm.com/developerworks/cn/linux/l-git-subversion-1/" target="_blank" rel="external">^面向 Subversion 用户的 Git，入门指南</a> 先从SVN的常见操作入手，再用GIT复现一遍</p>
 <p>如果你英文不错，可以看看<a href="http://git.or.cz/course/svn.html" target="_blank" rel="external">^SVN_CRASH_COURSE</a></p>
 <p>当然如果你想直接从头学习GIT，这里有个<a href="http://backlogtool.com/git-guide/cn/" target="_blank" rel="external">^猴子都能懂的GIT入门</a></p>
-<h3 id="常用命令对照_^3">常用命令对照 <a href="http://backlogtool.com/git-guide/cn/reference/git-svn.html" target="_blank" rel="external">^3</a></h3><table>
+<p>想了解更多，可以参考<a href="https://github.com/xirong/my-git" target="_blank" rel="external">^更多GIT资料</a></p>
+<h3 id="^常用命令对照"><a href="http://backlogtool.com/git-guide/cn/reference/git-svn.html" target="_blank" rel="external">^常用命令对照</a></h3><table>
 <thead>
 <tr>
 <th style="text-align:left">操作</th>
@@ -343,7 +407,26 @@
 
       
         
-          <span itemprop="articleBody"></span>
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>帮助要使用gerrit的用户，完成gerrit的基本配置<br>不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分</p>
+<h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目</p>
+<h3 id="步骤">步骤</h3><ul>
+<li>Mac／Linux直接下一步，Win用户推荐先去下载<a href="https://msysgit.github.io/" target="_blank" rel="external">^gitbash</a>,安装后，右键打开gitbash终端，不能下载的小伙伴请用 wad6到<a href="http://pan.baidu.com/s/1gdIW6hd" target="_blank" rel="external">^百度云</a>提取1.9.5版本<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png" alt=""></li>
+<li>参考<a href="https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E7%94%9F%E6%88%90-SSH-%E5%85%AC%E9%92%A5" target="_blank" rel="external">^Git-生成-SSH-公钥</a>生成SSH的public key，把~/.ssh/id_rsa.pub的内容拷贝出来，粘贴到gerrit个人配置的ssh选项中<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting5.png" alt=""></li>
+</ul>
+<ul>
+<li><p>点击 Projects-&gt;List到 gerrit的项目列表（admin可以创建新项目）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting1.png" alt=""></p>
+</li>
+<li><p>选择自己有权限的项目，例子中是demo这个项目<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting2.png" alt=""></p>
+</li>
+<li><p>在Project ${name} 下面有5个不明显的按钮，建议选择clone with commit-msg hook和SSH这两项（如果看不到这两项，可能是右上角用户名-&gt;settings里面还没有设置用户名）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting3.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting4.png" alt=""> </p>
+</li>
+<li><p>拷贝那串很长的命令，或者点击命令后面的公文包按钮，粘贴到终端（win用户gitbash）中执行，看到如下结果，说明配置成功<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting6.png" alt=""></p>
+</li>
+</ul>
+<h3 id="推荐资料">推荐资料</h3><p><a href="http://coolshell.cn/articles/1302.html" target="_blank" rel="external">^从Code Review 谈如何做技术</a>推荐有兴趣的了解一下</p>
+<p>更多gerrit使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>第四章</p>
+<p>内部gerrit和github用不同的ssh密钥，可以参考<a href="http://www.imtao.net/2014/04/12/git-multiple-account.html" target="_blank" rel="external">^git多账号切换</a></p>
+</span>
         
       
     </div>
@@ -458,7 +541,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>
