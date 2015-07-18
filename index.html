@@ -144,7 +144,7 @@
           
           
             
-              <a class="post-title-link" href="/2015/07/17/gerrit使用入门（常用操作）/" itemprop="url">
+              <a class="post-title-link" href="/2015/07/18/gerrit使用入门（常用操作）/" itemprop="url">
                 gerrit使用入门（常用操作）
               </a>
             
@@ -155,8 +155,8 @@
       <div class="post-meta">
         <span class="post-time">
           Posted on
-          <time itemprop="dateCreated" datetime="2015-07-17T18:01:02+08:00" content="2015-07-17">
-            2015-07-17
+          <time itemprop="dateCreated" datetime="2015-07-18T09:01:02+08:00" content="2015-07-18">
+            2015-07-18
           </time>
         </span>
 
@@ -175,9 +175,33 @@
 
       
         
-          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的评审流程</p>
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的<strong>基本</strong>的评审流程，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>，使用部分为chapter6，7</p>
 <h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置</p>
-<h3 id="步骤">步骤</h3></span>
+<h3 id="步骤">步骤</h3><ul>
+<li><p>此时你刚配置好gerrit，clone了代码，并开发了新的feature或改了一个bug，git add 修改的文件，git commit －m “描述这个feature或bug”(如果你不想每次都一个个选择修改的文件，可以把不想提交的文件放到gitignore中，然后git commit -a或git commit —all)<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting8.png" alt=""></p>
+</li>
+<li><p>运行git log，查看提交纪录，会看到里面有<strong>Change-Id</strong>这部分内容，这个Change-Id是gerrit用来标识一次修改的，如果没有看到，可以参考配置部分，拷贝那条clone命令的后半段，如scp -p -P 29418 admin@localhost:hooks/commit-msg demo/.git/hooks/在项目的<strong>上级目录(执行clone的目录)</strong>执行，失败说明SSH配置不成功，参考配置部分<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting9.png" alt=""></p>
+</li>
+<li><p>提交前先更新代码，建议运行git pull -r（如果你还不太了解git的分支，或者你的gerrit项目禁用了merge提交需要rebase代码，直接pull下来会形成本地merge），然后运行git push origin HEAD:refs/for/master，把修改提交到gerrit中repo的master分支上<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting11.png" alt=""></p>
+</li>
+<li><p>打开里面的链接，进入gerrit的web页面，如果你不是项目的owner或者admin，那么你看到的应该是下面的样子<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting12.png" alt=""></p>
+</li>
+<li><p>点开replay按钮的样子，＋1表示你认为代码变更没问题，－1表示有问题，然后加上自己的评论，0表示路过<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting13.png" alt=""></p>
+</li>
+<li><p>这时候需要添加评审人，可以是项目的owner和组内相同功能的backup小伙伴，他们中有权限的会看到下面的样子，＋2表示一定没问题，可以merge到master分支，－2表示一定有问题，需要修改，如果点击了＋2，页面会有submit按钮可点，点击后代码和并入对应分支（一般是master）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting15.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting14.png" alt=""></p>
+</li>
+<li><p>点击左下角的文件，review代码，然后根据自己的意见打分（<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>），如果一切顺利，admin或者owner觉得没问题，会看到下面的样子, 绿色字样Core-Review +2表示评审通过，等待admin或者owner点击submit合并到对应分支，这时候就review的提交者就可以去做别的事了，<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting16.png" alt=""></p>
+</li>
+<li><p>当然，拿出来review总是要还的，如果－2分不通过，则需要看看评审人的意见，然后做出修改<br>修改完成后，git add 修改的文件, 然后执行<strong>git commit —amend</strong>，说明作出的调整，然后重新git push origin HEAD:refs/for/master发出评审<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting17.png" alt=""></p>
+</li>
+<li><p>可以看到右上角的Patch Sets变成了2，点击以后可以选择，评审页面也可以选择，review后通过后submit就可以merge代码，打回后继续修改<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting18.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting19.png" alt=""></p>
+</li>
+<li><p>如果你觉得git push origin HEAD:refs/for/master这个命令很麻烦，可以了解一下<a href="https://github.com/openstack-infra/git-review" target="_blank" rel="external">^git-review</a>这个命令行小工具</p>
+</li>
+<li><p>如果你不喜欢命令行，喜欢用intellij idea或者eclipse或者或者其他GUI的工具，git gerrit也是有相关工具支持的，可以google一下</p>
+</li>
+</ul>
+</span>
         
       
     </div>
@@ -407,25 +431,26 @@
 
       
         
-          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>帮助要使用gerrit的用户，完成gerrit的基本配置<br>不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分</p>
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>，配置部分为chapter4</p>
 <h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目</p>
 <h3 id="步骤">步骤</h3><ul>
-<li>Mac／Linux直接下一步，Win用户推荐先去下载<a href="https://msysgit.github.io/" target="_blank" rel="external">^gitbash</a>,安装后，右键打开gitbash终端，不能下载的小伙伴请用 wad6到<a href="http://pan.baidu.com/s/1gdIW6hd" target="_blank" rel="external">^百度云</a>提取1.9.5版本<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png" alt=""></li>
+<li>Mac／Linux用户跳过这一步，Win用户推荐先去下载<a href="https://msysgit.github.io/" target="_blank" rel="external">^gitbash</a>,安装后，右键打开gitbash终端，不能下载的小伙伴请用 wad6到<a href="http://pan.baidu.com/s/1gdIW6hd" target="_blank" rel="external">^百度云</a>提取1.9.5版本<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png" alt=""></li>
 <li>参考<a href="https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E7%94%9F%E6%88%90-SSH-%E5%85%AC%E9%92%A5" target="_blank" rel="external">^Git-生成-SSH-公钥</a>生成SSH的public key，把~/.ssh/id_rsa.pub的内容拷贝出来，粘贴到gerrit个人配置的ssh选项中<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting5.png" alt=""></li>
 </ul>
 <ul>
 <li><p>点击 Projects-&gt;List到 gerrit的项目列表（admin可以创建新项目）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting1.png" alt=""></p>
 </li>
-<li><p>选择自己有权限的项目，例子中是demo这个项目<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting2.png" alt=""></p>
+<li><p>选择参与的项目，例子中是demo这个项目<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting2.png" alt=""></p>
 </li>
-<li><p>在Project ${name} 下面有5个不明显的按钮，建议选择clone with commit-msg hook和SSH这两项（如果看不到这两项，可能是右上角用户名-&gt;settings里面还没有设置用户名）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting3.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting4.png" alt=""> </p>
+<li><p>在Project ${name} 下面有5个不明显的按钮，建议选择clone with commit-msg hook和SSH这两项<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting3.png" alt=""></p>
+</li>
+<li><p>如果看不到这两项，可能是右上角用户名-&gt;settings里面还没有设置用户名<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting4.png" alt=""> </p>
 </li>
 <li><p>拷贝那串很长的命令，或者点击命令后面的公文包按钮，粘贴到终端（win用户gitbash）中执行，看到如下结果，说明配置成功<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting6.png" alt=""></p>
 </li>
 </ul>
-<h3 id="推荐资料">推荐资料</h3><p><a href="http://coolshell.cn/articles/1302.html" target="_blank" rel="external">^从Code Review 谈如何做技术</a>推荐有兴趣的了解一下</p>
-<p>更多gerrit使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>第四章</p>
-<p>内部gerrit和github用不同的ssh密钥，可以参考<a href="http://www.imtao.net/2014/04/12/git-multiple-account.html" target="_blank" rel="external">^git多账号切换</a></p>
+<h3 id="推荐资料">推荐资料</h3><p>内部gerrit和github用不同的ssh密钥，可以参考<a href="http://www.imtao.net/2014/04/12/git-multiple-account.html" target="_blank" rel="external">^git多账号切换</a></p>
+<p><a href="http://coolshell.cn/articles/1302.html" target="_blank" rel="external">^从Code Review 谈如何做技术</a>推荐有兴趣的了解一下</p>
 </span>
         
       
@@ -555,7 +580,7 @@
 
           <div class="site-state-item site-state-tags">
             
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">tags</span>
               
           </div>
