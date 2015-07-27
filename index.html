@@ -216,37 +216,65 @@
 <blockquote>
 <p>当我们开始把整个庞大（monolithic）的应用服务拆分并替换为大量的微服务，会发现什么特点？</p>
 </blockquote>
-<p><strong><em> 1.大量的部署单元（deployed units）</em></strong><br>许多小的微服务相比大的完整的服务会导致大量的部署单元，需要我们去管理和监控</p>
-<p><strong><em> 2.各个微服务既是服务提供方也是服务调用方</em></strong><br>这会导致系统中的各个微服务将会互相交互</p>
-<p><strong><em> 3.一些服务对外暴露API</em></strong><br>这些微服务将会负责把其他微服务包裹起来，作为对外访问的接口</p>
-<p><strong><em> 4.整个系统将会更加的灵活（dynamic）</em></strong><br>新的微服务被部署，老的服务被替换或删除，系统中负载增大时我们可以增加微服务中对应的实例来解决问题。这意味着与之前相比服务会以更高的频率启停。</p>
-<p><strong><em> 5.比如平均故障间隔（MTBF）将会被降低，故障在整个系统的角度将会更频繁的发生。</em></strong><br>软件组件（components）时而会失败。随着大量小的部署单元的变多，整个系统中部分（或者非常小的部分）会失败的可能性相比整个庞大的服务应用相比会增加。</p>
+<ul>
+<li><p><strong><em> 1.大量的部署单元（deployed units）</em></strong><br>许多小的微服务相比大的完整的服务会导致大量的部署单元，需要我们去管理和监控</p>
+</li>
+<li><p><strong><em> 2.各个微服务既是服务提供方也是服务调用方</em></strong><br>这会导致系统中的各个微服务将会互相交互</p>
+</li>
+<li><p><strong><em> 3.一些服务对外暴露API</em></strong><br>这些微服务将会负责把其他微服务包裹起来，作为对外访问的接口</p>
+</li>
+<li><p><strong><em> 4.整个系统将会更加的灵活（dynamic）</em></strong><br>新的微服务被部署，老的服务被替换或删除，系统中负载增大时我们可以增加微服务中对应的实例来解决问题。这意味着与之前相比服务会以更高的频率启停。</p>
+</li>
+<li><p><strong><em> 5.比如平均故障间隔（MTBF）将会被降低，故障在整个系统的角度将会更频繁的发生。</em></strong><br>软件组件（components）时而会失败。随着大量小的部署单元的变多，整个系统中部分（或者非常小的部分）会失败的可能性相比整个庞大的服务应用相比会增加。</p>
+</li>
+</ul>
 <h4 id="Questions">Questions</h4><p>这将会导致一些重要的问题，有些情况会关系到运行时的问题：</p>
-<p><strong><em>所有的微服务是如何配置的，它们配置的正确吗？</em></strong><br>当应用数量不多的时候管理配置并不是一个很难的问题。每个应用把自己的配置存在property文件中放在磁盘上，或者放在数据库的配置表中。当大量的微服务被部署到多个实例且运行在多个服务器的时候，这种方式变的非常难以控制。这会导致很多小的配置遍布到系统的各个部分，让整个系统想要高效高质量的维护变的很难。</p>
-<p><strong><em>什么样的微服务需要被部署，部署在哪里？</em></strong><br>追踪服务在哪台机器哪个端口对外开放在数量不多的时候是一个成本很低的操作。当大量的微服务独立部署之后，并且每个微服务本身还会持续变更，这时如果还用人工维护的话，那会是一个噩梦。</p>
-<p><strong><em>如何维护最新的路由信息？</em></strong><br>在一个动态变化的系统中作服务的调用方也会面对很多挑战。特别是当我们需要手工更新路由表，并且路由表在反向代理中或者在调用者的配置文件中时。根本上说，当我们在一个持续演化的系统中，系统的新的微服务随时会在新的机器或端口创建的时候，根本没有时间来让我们手动操作路由表。手工维护的交付时间相比之下就太慢了，因为变化次数的上升，手工操作出错的风险也会相比自动化配置有不必要的提高。</p>
-<p><strong><em>如何防止链式失败？（chain of failures）</em></strong><br>当微服务之间相互调用时，我们就需要对链式失败进行额外的关注。如果一个被很多服务以来的底层服务出问题了，会导致上层服务也出问题。如果不及时处理，大量服务会被一个出问题的服务拖累，导致我们的系统过于脆弱。</p>
-<p><strong><em>如何保证所有服务都启动并且正常运行？</em></strong><br>追踪不多的应用很容易，我们如何保证大量的微服务时，服务的健康性呢？</p>
-<p><strong><em>如果追踪在系统之间流转的信息？</em></strong><br>如果运营部门开始收到一些用户的抱怨，说我们的一些流程开始不正常了。<br>哪个微服务才是错误的根源？<br>我们如何能够找到那个出问题的流程？比如说订单号为12345的流程卡住，原因是微服务A不能访问，或者手动审批需要在微服务B之前才能发送确认消息。</p>
-<p><strong><em>如何才能确保只有API-services暴露给外部？</em></strong><br>比如我们如何避免外界未授权的请求访问我们的内部？</p>
-<p><strong><em>如何保证API－services的安全？</em></strong><br>这并不是关于微服务一个新的或者是特别的问题，但是当对外时，安全却是一个非常重要的问题。</p>
+<ul>
+<li><p><strong><em>所有的微服务是如何配置的，它们配置的正确吗？</em></strong><br>当应用数量不多的时候管理配置并不是一个很难的问题。每个应用把自己的配置存在property文件中放在磁盘上，或者放在数据库的配置表中。当大量的微服务被部署到多个实例且运行在多个服务器的时候，这种方式变的非常难以控制。这会导致很多小的配置遍布到系统的各个部分，让整个系统想要高效高质量的维护变的很难。</p>
+</li>
+<li><p><strong><em>什么样的微服务需要被部署，部署在哪里？</em></strong><br>追踪服务在哪台机器哪个端口对外开放在数量不多的时候是一个成本很低的操作。当大量的微服务独立部署之后，并且每个微服务本身还会持续变更，这时如果还用人工维护的话，那会是一个噩梦。</p>
+</li>
+<li><p><strong><em>如何维护最新的路由信息？</em></strong><br>在一个动态变化的系统中作服务的调用方也会面对很多挑战。特别是当我们需要手工更新路由表，并且路由表在反向代理中或者在调用者的配置文件中时。根本上说，当我们在一个持续演化的系统中，系统的新的微服务随时会在新的机器或端口创建的时候，根本没有时间来让我们手动操作路由表。手工维护的交付时间相比之下就太慢了，因为变化次数的上升，手工操作出错的风险也会相比自动化配置有不必要的提高。</p>
+</li>
+<li><p><strong><em>如何防止链式失败？（chain of failures）</em></strong><br>当微服务之间相互调用时，我们就需要对链式失败进行额外的关注。如果一个被很多服务以来的底层服务出问题了，会导致上层服务也出问题。如果不及时处理，大量服务会被一个出问题的服务拖累，导致我们的系统过于脆弱。</p>
+</li>
+<li><p><strong><em>如何保证所有服务都启动并且正常运行？</em></strong><br>追踪不多的应用很容易，我们如何保证大量的微服务时，服务的健康性呢？</p>
+</li>
+<li><p><strong><em>如何追踪在系统之间流转的信息？</em></strong><br>如果运营部门开始收到一些用户的抱怨，说我们的一些流程开始不正常了。<br>哪个微服务才是错误的根源？<br>我们如何能够找到那个出问题的流程？比如说订单号为12345的流程卡住，原因是微服务A不能访问，或者手动审批需要在微服务B之前才能发送确认消息。</p>
+</li>
+<li><p><strong><em>如何才能确保只有API-services暴露给外部？</em></strong><br>比如我们如何避免外界未授权的请求访问我们的内部？</p>
+</li>
+<li><p><strong><em>如何保证API－services的安全？</em></strong><br>这并不是关于微服务一个新的或者是特别的问题，但是当对外时，安全却是一个非常重要的问题。</p>
+</li>
+</ul>
 <h4 id="Required_components_必要组件">Required components 必要组件</h4><p>来给上述问题寻找答案，我们需要很多系统级别的新操作和管理的功能，但是当只操作少数应用服务时，这些功能其实是不太需要的。针对上述问题推荐的解决方案需要如下的组建：</p>
-<h5 id="Central_Configuration_server_中央配置服务器">Central Configuration server 中央配置服务器</h5><p>我们需要一个中央配置管理服务，而不是每个部署单元（如一个微服务）都靠一个本地的配置文件。我们同样需要配置的API来让微服务获取配置信息。</p>
-<h5 id="Service_Discovery_server_服务发现服务器">Service Discovery server 服务发现服务器</h5><p>我们需要一个服务发现的功能来让我们通过API使得微服务可以自主的在启动时注册服务，而不是手工的管理追踪服务被部署在哪个机器的哪个端口。</p>
-<h6 id="Dynamic_Routing_and_Load_Balancer_动态路由和负载均衡">Dynamic Routing and Load Balancer 动态路由和负载均衡</h6><p>路由组件在配合服务发现功能后可以使用服务发现API来查询需要的服务被部署在哪里，并且负载均衡组件可以决定多个实例中的哪一个实例来响应请求。</p>
-<h5 id="Circuit_Breaker_断路器">Circuit Breaker 断路器</h5><p>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">^Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">^Fowler - Circuit Breaker</a>。</p>
-<h6 id="Monitoring_监控">Monitoring 监控</h6><p>在断路器的配合下，我们可以监控断路器的状态，同时收集运行时信息来获得一个系统级别的健康的图谱。<br>这些信息可以在dashboard上收集和展示，并设置阈值自动报警。</p>
-<h5 id="Centralized_log_analysis_集中式的日志处理">Centralized log analysis 集中式的日志处理</h5><p>当服务卡住的时候，为了有能力追踪和发现问题，我们需要一个集中式的日志处理功能，它能访问到服务器并且收集每个微服务产生的日志文件。日志收集功能把把日志储存在一个中央日志系统，来提供搜索和展示的能力。<br>注意：为了有能力找到相护关联的信息，所有微服务之间在log中使用一个相关的id是非常重要的。</p>
-<h5 id="Edge_Server_边界服务器">Edge Server 边界服务器</h5><p>为了给外部暴露API服务并且防止未授权的请求访问内部服务，我们需要一个边界服务器，所有的外部访问都经过它们进入系统。边界服务器可以在上述服务发现组件的功能上复用动态路由和负载均衡的能力。边界服务器将会扮演一个动态和主动的反向代理，并且在内部系统发生变化的时候不需要手工更新。</p>
-<h5 id="OAuth_2-0_protected_API’s_在OAuth_2-0保护下的API">OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</h5><p>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">^OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
+<ul>
+<li><p><strong><em>Central Configuration server 中央配置服务器</em></strong><br>我们需要一个中央配置管理服务，而不是每个部署单元（如一个微服务）都靠一个本地的配置文件。我们同样需要配置的API来让微服务获取配置信息。</p>
+</li>
+<li><p><strong><em>Service Discovery server 服务发现服务器</em></strong><br>我们需要一个服务发现的功能来让我们通过API使得微服务可以自主的在启动时注册服务，而不是手工的管理追踪服务被部署在哪个机器的哪个端口。</p>
+</li>
+<li><p><strong><em>Dynamic Routing and Load Balancer 动态路由和负载均衡</em></strong><br>路由组件在配合服务发现功能后可以使用服务发现API来查询需要的服务被部署在哪里，并且负载均衡组件可以决定多个实例中的哪一个实例来响应请求。</p>
+</li>
+<li><p><strong><em>Circuit Breaker 断路器</em></strong><br>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">^Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">^Fowler - Circuit Breaker</a>。</p>
+</li>
+<li><p><strong><em>Monitoring 监控</em></strong><br>在断路器的配合下，我们可以监控断路器的状态，同时收集运行时信息来获得一个系统级别的健康的图谱。<br>这些信息可以在dashboard上收集和展示，并设置阈值自动报警。</p>
+</li>
+<li><p><strong><em>Centralized log analysis 集中式的日志处理</em></strong><br>当服务卡住的时候，为了有能力追踪和发现问题，我们需要一个集中式的日志处理功能，它能访问到服务器并且收集每个微服务产生的日志文件。日志收集功能把把日志储存在一个中央日志系统，来提供搜索和展示的能力。<br>注意：为了有能力找到相护关联的信息，所有微服务之间在log中使用一个相关的id是非常重要的。</p>
+</li>
+<li><p><strong><em>Edge Server 边界服务器</em></strong><br>为了给外部暴露API服务并且防止未授权的请求访问内部服务，我们需要一个边界服务器，所有的外部访问都经过它们进入系统。边界服务器可以在上述服务发现组件的功能上复用动态路由和负载均衡的能力。边界服务器将会扮演一个动态和主动的反向代理，并且在内部系统发生变化的时候不需要手工更新。</p>
+</li>
+<li><p><strong><em>OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</em></strong><br>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">^OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
 <ul>
 <li>一个新的组件作为OAuth鉴权服务器</li>
 <li>API服务会作为OAuth的资源服务器（OAuth Resource Server）</li>
 <li>外部的API调用作为OAuth的客户（OAuth Clients）</li>
 <li>边界服务器会作为OAuth的Token Relay意味着：<ul>
 <li>它会作为OAuth的资源服务器（OAuth Resource Server）</li>
-<li>它会让OAuth访问从外部通过，然后访问内部API服务。<br>注意：随着时间的推移，OAuth 2.0标准很有可能会被OpenID链接标准完全替代，来提供更好的鉴权功能。</li>
+<li>它会让OAuth访问从外部通过，然后访问内部API服务。</li>
 </ul>
+</li>
+</ul>
+<p>注意：随着时间的推移，OAuth 2.0标准很有可能会被<a href="http://openid.net/connect/" target="_blank" rel="external">^OpenID Connect</a>标准完全替代，来提供更好的鉴权功能。</p>
 </li>
 </ul>
 <h4 id="A_reference_model_参考模型">A reference model 参考模型</h4><p>综合上述，微服务需要的基础架构需要上面提到的一些服务来支撑微服务相护的API调用。这些可以如下图来举例：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-operations-reference-model.png" alt="reference model"></p>
