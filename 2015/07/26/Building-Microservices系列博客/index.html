@@ -28,7 +28,7 @@
 
 
 
-  <meta name="keywords" content="gerrit,git," />
+  <meta name="keywords" content="microservices,netflix oss," />
 
 
 
@@ -37,32 +37,25 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.4" />
 
 
-<meta name="description" content="目的帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及^gerrit是什么，^为什么要codereview的部分，更详细的gerrit的使用，可以参考^Learning Gerrit Code Review，配置部分为chapter4
-准备已经有可用的gerrit服务，并且有权限clone上面的某个项目
-步骤
-Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
+<meta name="description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/
+
+译文这个系列博客涉及了构建微服务的很多方面，使用了^SpringCloud,^Netflix OSS和^ ELK-stack等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础">
 <meta property="og:type" content="article">
-<meta property="og:title" content="gerrit使用入门（配置）">
-<meta property="og:url" content="http://yoursite.com/2015/07/17/gerrit使用入门（配置）/index.html">
+<meta property="og:title" content="Building Microservices系列博客">
+<meta property="og:url" content="http://yoursite.com/2015/07/26/Building-Microservices系列博客/index.html">
 <meta property="og:site_name" content="doublelduob's notes">
-<meta property="og:description" content="目的帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及^gerrit是什么，^为什么要codereview的部分，更详细的gerrit的使用，可以参考^Learning Gerrit Code Review，配置部分为chapter4
-准备已经有可用的gerrit服务，并且有权限clone上面的某个项目
-步骤
-Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting5.png">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting1.png">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting2.png">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting3.png">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting4.png">
-<meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting6.png">
-<meta property="og:updated_time" content="2015-07-19T14:19:34.000Z">
+<meta property="og:description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/
+
+译文这个系列博客涉及了构建微服务的很多方面，使用了^SpringCloud,^Netflix OSS和^ ELK-stack等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础">
+<meta property="og:updated_time" content="2015-07-27T11:27:53.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="gerrit使用入门（配置）">
-<meta name="twitter:description" content="目的帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及^gerrit是什么，^为什么要codereview的部分，更详细的gerrit的使用，可以参考^Learning Gerrit Code Review，配置部分为chapter4
-准备已经有可用的gerrit服务，并且有权限clone上面的某个项目
-步骤
-Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
+<meta name="twitter:title" content="Building Microservices系列博客">
+<meta name="twitter:description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/
+
+译文这个系列博客涉及了构建微服务的很多方面，使用了^SpringCloud,^Netflix OSS和^ ELK-stack等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -72,7 +65,7 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
   };
 </script>
 
-    <title> gerrit使用入门（配置） // doublelduob's notes </title>
+    <title> Building Microservices系列博客 // doublelduob's notes </title>
 </head>
 <body itemscope itemtype="http://schema.org/WebPage" lang="en">
 <!--[if lte IE 8]>
@@ -159,7 +152,7 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
           
           
             
-              gerrit使用入门（配置）
+              Building Microservices系列博客
             
           
         </h1>
@@ -168,8 +161,8 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
       <div class="post-meta">
         <span class="post-time">
           Posted on
-          <time itemprop="dateCreated" datetime="2015-07-17T12:19:11+08:00" content="2015-07-17">
-            2015-07-17
+          <time itemprop="dateCreated" datetime="2015-07-26T21:18:05+08:00" content="2015-07-26">
+            2015-07-26
           </time>
         </span>
 
@@ -187,26 +180,22 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
       
 
       
-        <span itemprop="articleBody"><h3 id="目的">目的</h3><p>帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>，配置部分为chapter4</p>
-<h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目</p>
-<h3 id="步骤">步骤</h3><ul>
-<li>Mac／Linux用户跳过这一步，Win用户推荐先去下载<a href="https://msysgit.github.io/" target="_blank" rel="external">^gitbash</a>,安装后，右键打开gitbash终端，不能下载的小伙伴请用 wad6到<a href="http://pan.baidu.com/s/1gdIW6hd" target="_blank" rel="external">^百度云</a>提取1.9.5版本<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png" alt=""></li>
-<li>参考<a href="https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E7%94%9F%E6%88%90-SSH-%E5%85%AC%E9%92%A5" target="_blank" rel="external">^Git-生成-SSH-公钥</a>生成SSH的public key，把~/.ssh/id_rsa.pub的内容拷贝出来，粘贴到gerrit个人配置的ssh选项中<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting5.png" alt=""></li>
-</ul>
+        <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
+<p><a href="http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/</a></p>
+</blockquote>
+<h3 id="译文">译文</h3><p>这个系列博客涉及了构建微服务的很多方面，使用了<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">^SpringCloud</a>,<a href="http://netflix.github.io/" target="_blank" rel="external">^Netflix OSS</a>和<a href="Elasticsearch, Logstash and Kibana">^ ELK-stack</a>等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础架构上部署微服务。</p>
 <ul>
-<li><p>点击 Projects-&gt;List到 gerrit的项目列表（admin可以创建新项目）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting1.png" alt=""></p>
-</li>
-<li><p>选择参与的项目，例子中是demo这个项目<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting2.png" alt=""></p>
-</li>
-<li><p>在Project ${name} 下面有5个不明显的按钮，建议选择clone with commit-msg hook和SSH这两项<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting3.png" alt=""></p>
-</li>
-<li><p>如果看不到这两项，可能是右上角用户名-&gt;settings里面还没有设置用户名<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting4.png" alt=""> </p>
-</li>
-<li><p>拷贝那串很长的命令，或者点击命令后面的公文包按钮，粘贴到终端（win用户gitbash）中执行，看到如下结果，说明配置成功<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting6.png" alt=""></p>
-</li>
+<li><a href="/2015/07/27/Part-0-介绍：微服务的operations-model/">^Part 0 介绍：微服务的operations model</a></li>
+<li>Part 1: 使用 Netflix Eureka（Service Discovery）, Ribbon（Load Balancing） 和 Zuul(Gate Server) 构建微服务</li>
+<li>Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败</li>
+<li>Part 3: 使用OAuth 2.0来让API更安全</li>
+<li>Part 4: 让Microservices Docker化</li>
 </ul>
-<h3 id="推荐资料">推荐资料</h3><p>内部gerrit和github用不同的ssh密钥，可以参考<a href="http://www.imtao.net/2014/04/12/git-multiple-account.html" target="_blank" rel="external">^git多账号切换</a></p>
-<p><a href="http://coolshell.cn/articles/1302.html" target="_blank" rel="external">^从Code Review 谈如何做技术</a>推荐有兴趣的了解一下</p>
+<h3 id="译者注">译者注</h3><ul>
+<li>这个系列博客是CALLISTA公司的MAGNUS LARSSON（近30年的编程经验）所作</li>
+<li>这个系列博客不同于其他介绍微服务博客的地方在于，除了介绍概念，还提供了功能完备的demo，服务发现，负载均衡，接入层控制，自动化部署竟然在demo中都有体现，由浅入深，非常适合边看边动手。</li>
+<li>我很喜欢in-action类型的博客，所以征求了作者的许可，把这个系列翻译成中文，希望更多的人可以看到，翻译错误之处还望指正。</li>
+</ul>
 </span>
       
     </div>
@@ -215,9 +204,9 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
       
         <div class="post-tags">
           
-            <a href="/tags/gerrit/" rel="tag">#gerrit</a>
+            <a href="/tags/microservices/" rel="tag">#microservices</a>
           
-            <a href="/tags/git/" rel="tag">#git</a>
+            <a href="/tags/netflix-oss/" rel="tag">#netflix oss</a>
           
         </div>
       
@@ -226,11 +215,13 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/07/17/给SVN用户看的GIT使用入门/" rel="prev">给SVN用户看的GIT使用入门</a>
+              <a href="/2015/07/27/Part-0-介绍：微服务的operations-model/" rel="prev">Part 0 介绍：微服务的operations model</a>
             
           </div>
 
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/07/18/gerrit使用入门（常用操作）/" rel="next">gerrit使用入门（常用操作）</a>
             
           </div>
         </div>
@@ -335,7 +326,7 @@ Mac／Linux用户跳过这一步，Win用户推荐先去下载^gitbash">
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#目的"><span class="nav-number">1.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#准备"><span class="nav-number">2.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#步骤"><span class="nav-number">3.</span> <span class="nav-text">步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐资料"><span class="nav-number">4.</span> <span class="nav-text">推荐资料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#原文链接"><span class="nav-number">1.</span> <span class="nav-text">原文链接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#译文"><span class="nav-number">2.</span> <span class="nav-text">译文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#译者注"><span class="nav-number">3.</span> <span class="nav-text">译者注</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
