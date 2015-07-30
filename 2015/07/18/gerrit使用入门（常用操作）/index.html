@@ -37,18 +37,18 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.4" />
 
 
-<meta name="description" content="目的在完成gerrit的基本配置之后，帮助用户熟悉gerrit的基本的评审流程，不会涉及^gerrit是什么，^为什么要codereview的部分，更详细的gerrit的使用，可以参考^Learning Gerrit Code Review，使用部分为chapter6，7
+<meta name="description" content="目的在完成gerrit的基本配置之后，帮助用户熟悉gerrit的基本的评审流程，不会涉及gerrit是什么，为什么要codereview的部分，更详细的gerrit的使用，可以参考Learning Gerrit Code Review，使用部分为chapter6，7
 准备已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置
 步骤
-此时你刚配置好gerrit，cl">
+此时你刚配置好gerrit，clone">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gerrit使用入门（常用操作）">
 <meta property="og:url" content="http://yoursite.com/2015/07/18/gerrit使用入门（常用操作）/index.html">
 <meta property="og:site_name" content="doublelduob's notes">
-<meta property="og:description" content="目的在完成gerrit的基本配置之后，帮助用户熟悉gerrit的基本的评审流程，不会涉及^gerrit是什么，^为什么要codereview的部分，更详细的gerrit的使用，可以参考^Learning Gerrit Code Review，使用部分为chapter6，7
+<meta property="og:description" content="目的在完成gerrit的基本配置之后，帮助用户熟悉gerrit的基本的评审流程，不会涉及gerrit是什么，为什么要codereview的部分，更详细的gerrit的使用，可以参考Learning Gerrit Code Review，使用部分为chapter6，7
 准备已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置
 步骤
-此时你刚配置好gerrit，cl">
+此时你刚配置好gerrit，clone">
 <meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting8.png">
 <meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting9.png">
 <meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting11.png">
@@ -60,13 +60,13 @@
 <meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting17.png">
 <meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting18.png">
 <meta property="og:image" content="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting19.png">
-<meta property="og:updated_time" content="2015-07-28T05:34:40.000Z">
+<meta property="og:updated_time" content="2015-07-30T01:05:25.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="gerrit使用入门（常用操作）">
-<meta name="twitter:description" content="目的在完成gerrit的基本配置之后，帮助用户熟悉gerrit的基本的评审流程，不会涉及^gerrit是什么，^为什么要codereview的部分，更详细的gerrit的使用，可以参考^Learning Gerrit Code Review，使用部分为chapter6，7
+<meta name="twitter:description" content="目的在完成gerrit的基本配置之后，帮助用户熟悉gerrit的基本的评审流程，不会涉及gerrit是什么，为什么要codereview的部分，更详细的gerrit的使用，可以参考Learning Gerrit Code Review，使用部分为chapter6，7
 准备已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置
 步骤
-此时你刚配置好gerrit，cl">
+此时你刚配置好gerrit，clone">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -191,7 +191,7 @@
       
 
       
-        <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的<strong>基本</strong>的评审流程，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>，使用部分为chapter6，7</p>
+        <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的<strong>基本</strong>的评审流程，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">Learning Gerrit Code Review</a>，使用部分为chapter6，7</p>
 <h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置</p>
 <h3 id="步骤">步骤</h3><ul>
 <li><p>此时你刚配置好gerrit，clone了代码，并开发了新的feature或改了一个bug，git add 修改的文件，git commit －m “描述这个feature或bug”(如果你不想每次都一个个选择修改的文件，可以把不想提交的文件放到.gitignore文件中，然后git commit -a或git commit —all)<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting8.png" alt=""></p>
@@ -206,13 +206,13 @@
 </li>
 <li><p>这时候需要添加评审人，可以是项目的owner和组内相同功能的backup小伙伴，他们中有权限的会看到下面的样子，＋2表示review后认为没问题，可以merge到master分支，－2表示有问题，需要修改，如果点击了＋2，页面会有submit按钮可点，点击后代码和并入对应分支（一般是master）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting15.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting14.png" alt=""></p>
 </li>
-<li><p>点击左下角的文件，review代码，然后根据自己的意见打分（<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>），如果一切顺利，admin或者owner觉得没问题，会看到下面的样子, 绿色字样Core-Review +2表示评审通过，等待admin或者owner点击submit合并到对应分支，这时候就review的提交者就可以去做别的事了，<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting16.png" alt=""></p>
+<li><p>点击左下角的文件，review代码，然后根据自己的意见打分（<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>），如果一切顺利，admin或者owner觉得没问题，会看到下面的样子, 绿色字样Core-Review +2表示评审通过，等待admin或者owner点击submit合并到对应分支，这时候就review的提交者就可以去做别的事了，<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting16.png" alt=""></p>
 </li>
 <li><p>当然，拿出来review总是要还的，如果－2分不通过，则需要看看评审人的意见，然后做出修改<br>修改完成后，git add 修改的文件, 然后执行<strong>git commit —amend</strong>，说明作出的调整，然后重新git push origin HEAD:refs/for/master发出评审<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting17.png" alt=""></p>
 </li>
 <li><p>可以看到右上角的Patch Sets变成了2，点击以后可以选择，评审页面也可以选择，review后通过后submit就可以merge代码，打回后继续修改<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting18.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting19.png" alt=""></p>
 </li>
-<li><p>如果你觉得git push origin HEAD:refs/for/master这个命令很麻烦，可以了解一下<a href="https://github.com/openstack-infra/git-review" target="_blank" rel="external">^git-review</a>这个命令行小工具</p>
+<li><p>如果你觉得git push origin HEAD:refs/for/master这个命令很麻烦，可以了解一下<a href="https://github.com/openstack-infra/git-review" target="_blank" rel="external">git-review</a>这个命令行小工具</p>
 </li>
 <li><p>如果你不喜欢命令行，喜欢用intellij idea或者eclipse或者或者其他GUI的工具，git gerrit也是有相关工具支持的，可以google一下</p>
 </li>

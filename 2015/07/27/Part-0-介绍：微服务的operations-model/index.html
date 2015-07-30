@@ -40,7 +40,7 @@
 <meta name="description" content="原文链接
 http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/
 
-译文这篇博客不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部">
+译文这篇博客不是微服务的介绍，这有一个很好的介绍Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Part 0 介绍：微服务的operations model">
 <meta property="og:url" content="http://yoursite.com/2015/07/27/Part-0-介绍：微服务的operations-model/index.html">
@@ -48,19 +48,19 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 <meta property="og:description" content="原文链接
 http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/
 
-译文这篇博客不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部">
+译文这篇博客不是微服务的介绍，这有一个很好的介绍Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-architecture.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-2.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-1.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-operations-reference-model.png">
-<meta property="og:updated_time" content="2015-07-29T11:44:09.000Z">
+<meta property="og:updated_time" content="2015-07-30T01:03:44.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Part 0 介绍：微服务的operations model">
 <meta name="twitter:description" content="原文链接
 http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/
 
-译文这篇博客不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部">
+译文这篇博客不是微服务的介绍，这有一个很好的介绍Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -188,7 +188,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
         <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>这篇博客不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">^Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
+<h3 id="译文">译文</h3><p>这篇博客不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
 <p>一个分布式系统中部署的微服务数量不断增加时与整块庞大（monothilic）服务的数量不断增加相比，新挑战的出现不会非常明显（译者注：因为微服务架构设计时照顾了水平扩展的需求）。这篇博客将会聚焦在这些大量微服务情况下出现的新挑战上，并会给大量微服务定义一个operations model。</p>
 <p>这篇博客分为如下几个部分：</p>
 <ul>
@@ -217,7 +217,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 <p>水平的看，我们也可以采用领域切分的方式。</p>
 <p>这样我们的目标系统架构会是：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-architecture.png" alt="sample target architecture"><br>注意：这只是个参考的目标系统架构，你的架构可能会和这个完全不同。关键点在于你需要建立一个目标系统架构才能开始考虑如何水平扩展（scale up）你的微服务。否则你的系统最终可能像一大碗意大利面，并且很多特性还不如现有的整块庞大（monolithic）的应用服务。</p>
 <h5 id="CONTINUOUS_DELIVERY_持续部署">CONTINUOUS DELIVERY 持续部署</h5><p>我们还假定已经有了一定程度上的持续部署工具链，这样我们就能高效可重复且高质量地驱动微服务的运行。参考图：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-2.png" alt="continues delivery"><br>(图片来源: <a href="http://www.infoq.com/minibooks/emag-devops-toolchain" target="_blank" rel="external">http://www.infoq.com/minibooks/emag-devops-toolchain</a>)</p>
-<h5 id="ORGANIZATION_组织架构">ORGANIZATION 组织架构</h5><p>最终，我们还假定我们采用了合适的组织架构来避免<a href="http://www.melconway.com/Home/Conways_Law.html" target="_blank" rel="external">^Conway’s law</a>中提到的一些问题。Conway’s law称：</p>
+<h5 id="ORGANIZATION_组织架构">ORGANIZATION 组织架构</h5><p>最终，我们还假定我们采用了合适的组织架构来避免<a href="http://www.melconway.com/Home/Conways_Law.html" target="_blank" rel="external">Conway’s law</a>中提到的一些问题。Conway’s law称：</p>
 <blockquote>
 <p>设计系统的组织，最终产生的设计等同于组织之内、之间的沟通结构。</p>
 </blockquote>
@@ -265,7 +265,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 </li>
 <li><p><strong><em>Dynamic Routing and Load Balancer 动态路由和负载均衡</em></strong><br>路由组件在配合服务发现功能后可以使用服务发现API来查询需要的服务被部署在哪里，并且负载均衡组件可以决定多个实例中的哪一个实例来响应请求。</p>
 </li>
-<li><p><strong><em>Circuit Breaker 断路器</em></strong><br>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">^Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">^Fowler - Circuit Breaker</a>。</p>
+<li><p><strong><em>Circuit Breaker 断路器</em></strong><br>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">Fowler - Circuit Breaker</a>。</p>
 </li>
 <li><p><strong><em>Monitoring 监控</em></strong><br>在断路器的配合下，我们可以监控断路器的状态，同时收集运行时信息来获得一个系统级别的健康的图谱。<br>这些信息可以在dashboard上收集和展示，并设置阈值自动报警。</p>
 </li>
@@ -273,7 +273,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 </li>
 <li><p><strong><em>Edge Server 边界服务器</em></strong><br>为了给外部暴露API服务并且防止未授权的请求访问内部服务，我们需要一个边界服务器，所有的外部访问都经过它们进入系统。边界服务器可以在上述服务发现组件的功能上复用动态路由和负载均衡的能力。边界服务器将会扮演一个动态和主动的反向代理，并且在内部系统发生变化的时候不需要手工更新。</p>
 </li>
-<li><p><strong><em>OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</em></strong><br>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">^OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
+<li><p><strong><em>OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</em></strong><br>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
 <ul>
 <li>一个新的组件作为OAuth鉴权服务器</li>
 <li>API服务会作为OAuth的资源服务器（OAuth Resource Server）</li>
@@ -284,7 +284,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 </ul>
 </li>
 </ul>
-<p>注意：随着时间的推移，OAuth 2.0标准很有可能会被<a href="http://openid.net/connect/" target="_blank" rel="external">^OpenID Connect</a>标准完全替代，来提供更好的鉴权功能。</p>
+<p>注意：随着时间的推移，OAuth 2.0标准很有可能会被<a href="http://openid.net/connect/" target="_blank" rel="external">OpenID Connect</a>标准完全替代，来提供更好的鉴权功能。</p>
 </li>
 </ul>
 <h4 id="A_reference_model_参考模型">A reference model 参考模型</h4><p>综合上述，微服务需要的基础架构需要上面提到的一些服务来支撑微服务相护的API调用。这些可以如下图来举例：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-operations-reference-model.png" alt="reference model"></p>

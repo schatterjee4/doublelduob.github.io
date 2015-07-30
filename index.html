@@ -178,10 +178,10 @@
           <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/10/building-microservices-with-spring-cloud-and-netflix-oss-part-1/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/10/building-microservices-with-spring-cloud-and-netflix-oss-part-1/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>在<a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">^前面的博客中</a>，我们定义了使用微服务时的operations model。在这篇博客中，我们来看一下如何用<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">^Spring Cloud</a>和<a href="http://netflix.github.io/" target="_blank" rel="external">^Netflix OSS</a>来实现这个模型（model）。我们会涉及operations model中的几个核心部分：服务发现（service discovery），动态代理(dynamic routing)，负载均衡(load balancing)和边界服务器(edge server)，其他部分会在后续的博客中体现。</p>
+<h3 id="译文">译文</h3><p>在<a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">前面的博客中</a>，我们定义了使用微服务时的operations model。在这篇博客中，我们来看一下如何用<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>来实现这个模型（model）。我们会涉及operations model中的几个核心部分：服务发现（service discovery），动态代理(dynamic routing)，负载均衡(load balancing)和边界服务器(edge server)，其他部分会在后续的博客中体现。</p>
 <p>我们会使用Spring Cloud和Nexflix OSS中的一些核心组件，来让我们独立部署的微服务之间的交互时不用手工管理，比如管理每个微服务跑在哪个机器哪个端口，或者管理之间的路由关系。我们的微服务会在启动时设定一个动态分配的端口区间来防止端口冲突。我们还会用一个边界服务器作为入口，通过它来允许访问我们的微服务。</p>
 <p>首先我们会简单的介绍Spring Could和Netflix OSS组件，之后我们将会给出一个这个系列博客都不断完善的系统结构。我们会从获取代码，编译构建开始，然后简单讲解代码中重要的部分，最终我们会简单的做一些测试来展示如何访问我们的微服务。启动新的微服务实例并让负载均衡组件工作都是非常容易的，不需要我们手工的配置。</p>
-<h4 id="SPRING_CLOUD_AND_NETFLIX_OSS">SPRING CLOUD AND NETFLIX OSS</h4><p>Spring Cloud是<a href="http://spring.io/projects" target="_blank" rel="external">^spring.io family</a>中的<a href="https://spring.io/blog/2015/03/04/spring-cloud-1-0-0-available-now" target="_blank" rel="external">^新项目</a>，它里面的一些组件会被我们用到。Spring Cloud 1.0 很大部分上基于<a href="http://netflix.github.io/" target="_blank" rel="external">^Netflix OSS</a>的开源组件。Spring Cloud用非常友好的<strong>自动配置</strong>和<strong>约定优于配置（convention over configuration）</strong>的方法集成了Netflix的组件到Spring环境中，这些友好的方式和<a href="http://callistaenterprise.se/blogg/teknik/2014/04/15/a-first-look-at-spring-boot/" target="_blank" rel="external">^Spring Boot</a>的设计理念一致。</p>
+<h4 id="SPRING_CLOUD_AND_NETFLIX_OSS">SPRING CLOUD AND NETFLIX OSS</h4><p>Spring Cloud是<a href="http://spring.io/projects" target="_blank" rel="external">spring.io family</a>中的<a href="https://spring.io/blog/2015/03/04/spring-cloud-1-0-0-available-now" target="_blank" rel="external">新项目</a>，它里面的一些组件会被我们用到。Spring Cloud 1.0 很大部分上基于<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>的开源组件。Spring Cloud用非常友好的<strong>自动配置</strong>和<strong>约定优于配置（convention over configuration）</strong>的方法集成了Netflix的组件到Spring环境中，这些友好的方式和<a href="http://callistaenterprise.se/blogg/teknik/2014/04/15/a-first-look-at-spring-boot/" target="_blank" rel="external">Spring Boot</a>的设计理念一致。</p>
 <p>下面的表格是operations model和实际我们会使用的组件之间的对应关系：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/mapping-table.png" alt=""></p>
 <p>我们会在这篇博客中使用Eureka，Ribbon和Zuul的一部分功能：</p>
 <ul>
@@ -189,10 +189,10 @@
 </li>
 <li><p><strong><em>Netflix Ribbon - 动态路由和负载均衡(Dynamic Routing and Load Balancer)</em></strong><br>Netflix Ribbon 可以让服务消费者在运行时查询可用的服务。Ribbon通过Eureka提供的信息来找到合适的服务实例。如果大于一个实例被发现，Ribbon会应用负载均衡来使负载平均到每个实例上。Ribbon不是作为一个独立的服务，而是一个内嵌在服务消费者中的组件来提供服务。</p>
 </li>
-<li><p><strong><em>Netflix Zuul - 边界服务器（Edge Server）</em></strong><br>Zuul是我们对外部世界的<a href="http://ghostbusters.wikia.com/wiki/Zuul" target="_blank" rel="external">^gatekeeper</a>，禁止一切未被授权的外部访问通过。Zuul同样作为微服务对外部的入口。使用动态分配端口可以很方便的避免端口冲突的问题，也能减少管理成本，但是会给服务的使用增加一些困难。Zuul使用Ribbon来查询可用的服务，把外部的服务路由到内部合适的服务实例上。我们在这篇博客中会使用Zuul来提供一个入口（wellkown entrypoint），安全的问题会在后续的博客中解答。</p>
+<li><p><strong><em>Netflix Zuul - 边界服务器（Edge Server）</em></strong><br>Zuul是我们对外部世界的<a href="http://ghostbusters.wikia.com/wiki/Zuul" target="_blank" rel="external">gatekeeper</a>，禁止一切未被授权的外部访问通过。Zuul同样作为微服务对外部的入口。使用动态分配端口可以很方便的避免端口冲突的问题，也能减少管理成本，但是会给服务的使用增加一些困难。Zuul使用Ribbon来查询可用的服务，把外部的服务路由到内部合适的服务实例上。我们在这篇博客中会使用Zuul来提供一个入口（wellkown entrypoint），安全的问题会在后续的博客中解答。</p>
 </li>
 </ul>
-<p>注意: 那些通过边界服务器，允许外界访问的微服务就会被认为是系统层面的<a href="http://www.programmableweb.com/apis/directory" target="_blank" rel="external">^API</a>。</p>
+<p>注意: 那些通过边界服务器，允许外界访问的微服务就会被认为是系统层面的<a href="http://www.programmableweb.com/apis/directory" target="_blank" rel="external">API</a>。</p>
 <h4 id="A_SYSTEM_LANDSCAPE">A SYSTEM LANDSCAPE</h4><p>我们需要一个系统结构来把各个组件串联起来。本篇博客中我们的会开发一个如下图所示的结构：</p>
 <p>它包括四个业务服务（绿色部分）：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/system-landscape.png" alt=""></p>
 <p>三个核心服务包括<strong><em>产品（products），推荐（recommendations）和审核（reviews）</em></strong>。<br>一个复合服务<strong><em>product-composite</em></strong>用来从其他三个核心服务组合（aggregate）信息，提供一个产品的信息并组合审核（reviews）和推荐的内容在其中。</p>
@@ -220,14 +220,14 @@
 <p>如果你在windows环境，你可以执行bat-file build-all.bat!<br>然后你会看到六条成功的信息：</p>
 </blockquote>
 <pre><code><span class="keyword">BUILD </span>SUCCESSFUL
-</code></pre><h4 id="SOURCE_CODE_WALKTHROUGH">SOURCE CODE WALKTHROUGH</h4><p>我先来简要看下代码的关键部分。每个微服都被开发为一个独立可部署的<a href="http://callistaenterprise.se/blogg/teknik/2014/04/15/a-first-look-at-spring-boot/" target="_blank" rel="external">^Spring Boot</a>应用，这里使用了<a href="http://undertow.io/" target="_blank" rel="external">^Undertow</a>这个轻量级的Servlet3.1的容器作为web server。<a href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html" target="_blank" rel="external">^Spring MVC</a>用在实现基于REST的服务，<a href="https://spring.io/blog/2009/03/27/rest-in-spring-3-resttemplate" target="_blank" rel="external">^Spring RestTemplate</a>被用于对外调用。想对用到的这些主要技术了解更多，可以关注我们后续的博客。</p>
+</code></pre><h4 id="SOURCE_CODE_WALKTHROUGH">SOURCE CODE WALKTHROUGH</h4><p>我先来简要看下代码的关键部分。每个微服都被开发为一个独立可部署的<a href="http://callistaenterprise.se/blogg/teknik/2014/04/15/a-first-look-at-spring-boot/" target="_blank" rel="external">Spring Boot</a>应用，这里使用了<a href="http://undertow.io/" target="_blank" rel="external">Undertow</a>这个轻量级的Servlet3.1的容器作为web server。<a href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html" target="_blank" rel="external">Spring MVC</a>用在实现基于REST的服务，<a href="https://spring.io/blog/2009/03/27/rest-in-spring-3-resttemplate" target="_blank" rel="external">Spring RestTemplate</a>被用于对外调用。想对用到的这些主要技术了解更多，可以关注我们后续的博客。</p>
 <p>现在让我们聚焦在如何使用Spring Cloud和Netflix OSS来实现我们的功能吧！</p>
 <p>注意：我们有意让实现尽可能的简单，让代码容易被获取和理解。</p>
 <h5 id="GRADLE_DEPENDENCIES">GRADLE DEPENDENCIES</h5><p>和Spring Boot的设计思想相同，Spring Cloud定义了一些starter依赖，让我们可以非常容易的引入特定的功能特性。我们只要在build file里面添加如下内容，就可以在微服务中使用Eureka和Ribbon实现注册和调用其他微服务的功能：</p>
 <pre><code><span class="function"><span class="title">compile</span><span class="params">(<span class="string">"org.springframework.cloud:spring-cloud-starter-eureka:1.0.0.RELEASE"</span>)</span></span>
-</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/core/product-service/build.gradle" target="_blank" rel="external">^product-service/build.gradle</a>。<br>增加如下以来来配置Eureka服务器：</p>
+</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/core/product-service/build.gradle" target="_blank" rel="external">product-service/build.gradle</a>。<br>增加如下以来来配置Eureka服务器：</p>
 <pre><code><span class="function"><span class="title">compile</span><span class="params">(<span class="string">'org.springframework.cloud:spring-cloud-starter-eureka-server:1.0.0.RELEASE'</span>)</span></span>
-</code></pre><p>完整例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/discovery-server/build.gradle" target="_blank" rel="external">^discovery-server/build.gradle</a>。</p>
+</code></pre><p>完整例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/discovery-server/build.gradle" target="_blank" rel="external">discovery-server/build.gradle</a>。</p>
 <h5 id="Infrastructure_servers">Infrastructure servers</h5><p>搭建基于Spring Cloud和Netflix OSS的基础服务器非常简单。比如搭建一个Eureka服务器仅需要在一个标准的Spring Boot应用中添加一个@EnableEurekaServer的注解：</p>
 <pre><code><span class="annotation">@SpringBootApplication</span>
 <span class="annotation">@EnableEurekaServer</span>
@@ -237,14 +237,14 @@
     SpringApplication.run(EurekaApplication.<span class="keyword">class</span>, args);
   }
 }
-</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/discovery-server/src/main/java/se/callista/microservises/support/discovery/EurekaApplication.java" target="_blank" rel="external">^EurekaApplication.java</a>。<br>搭建一个Zuul服务器添加 @EnableZuulProxy注解。完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/edge-server/src/main/java/se/callista/microservises/support/edge/ZuulApplication.java" target="_blank" rel="external">^ZuulApplication.java</a>。</p>
+</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/discovery-server/src/main/java/se/callista/microservises/support/discovery/EurekaApplication.java" target="_blank" rel="external">EurekaApplication.java</a>。<br>搭建一个Zuul服务器添加 @EnableZuulProxy注解。完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/edge-server/src/main/java/se/callista/microservises/support/edge/ZuulApplication.java" target="_blank" rel="external">ZuulApplication.java</a>。</p>
 <p>仅用这些简单的注解就可以配置好服务器的默认配置并可以启动了。当我们需要特定的配置时可以覆盖默认的配置。一个例子是当我们需要限制什么服务可以被边界服务器允许被外部访问的时候，我们需要覆盖默认的配置做出修改。默认时Zuul设置的路由可以到Eureka中设置的每一个服务。我们用如下的配置即可限制路由只允许访问composite product这个服务的调用通过：</p>
 <pre><code><span class="string">zuul:</span>
 <span class="string">ignoredServices:</span> <span class="string">"*"</span>
 <span class="string">routes:</span>
 <span class="string">productcomposite:</span>
 <span class="label">  path:</span> <span class="regexp">/productcomposite/</span>**
-</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/edge-server/src/main/resources/application.yml" target="_blank" rel="external">^edge-server/application.yml</a></p>
+</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/support/edge-server/src/main/resources/application.yml" target="_blank" rel="external">edge-server/application.yml</a></p>
 <h5 id="BUSINESS_SERVICES">BUSINESS SERVICES</h5><p>使用Eureka自动注册微服务，只需要在Spring Boot应用上添加@EnableDiscoveryClient注解。</p>
 <pre><code><span class="annotation">@SpringBootApplication</span>
 <span class="annotation">@EnableDiscoveryClient</span>
@@ -254,7 +254,7 @@
     SpringApplication.run(ProductServiceApplication.<span class="keyword">class</span>, args);
   }
 }
-</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/core/product-service/src/main/java/se/callista/microservises/core/product/ProductServiceApplication.java" target="_blank" rel="external">^ProductServiceApplication.java</a>。</p>
+</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/core/product-service/src/main/java/se/callista/microservises/core/product/ProductServiceApplication.java" target="_blank" rel="external">ProductServiceApplication.java</a>。</p>
 <p>使用Ribbon发现并调用微服务，使用Spring RestTemplate：</p>
 <pre><code>@Autowired<span class="keyword">
 private</span> <span class="class">LoadBalancerClient loadBalancer;</span>
@@ -266,11 +266,11 @@ public</span> ResponseEntity&lt;List&lt;Recommendation&gt;&gt;<span class="funct
 <span class="keyword">            .</span>..
         response =<span class="function"> restTemplate.getForEntity(</span>url, String.class<span class="function">)</span>;
 </code></pre><p>服务的调用者需要知道服务的名字（会在下面介绍），Ribbon将会找到服务的实例并返回服务的URI给调用者。</p>
-<p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/composite/product-composite-service/src/main/java/se/callista/microservices/composite/product/service/Util.java" target="_blank" rel="external">^Util.java</a>和<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/composite/product-composite-service/src/main/java/se/callista/microservices/composite/product/service/ProductCompositeIntegration.java" target="_blank" rel="external">^ProductCompositeIntegration.java</a>。</p>
+<p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/composite/product-composite-service/src/main/java/se/callista/microservices/composite/product/service/Util.java" target="_blank" rel="external">Util.java</a>和<a href="https://github.com/callistaenterprise/blog-microservices/blob/B1/microservices/composite/product-composite-service/src/main/java/se/callista/microservices/composite/product/service/ProductCompositeIntegration.java" target="_blank" rel="external">ProductCompositeIntegration.java</a>。</p>
 <h5 id="START_UP_THE_SYSTEM_LANDSCAPE">START UP THE SYSTEM LANDSCAPE</h5><blockquote>
 <p>在本篇博客中，我们将会把微服务启动在本地。在后续的博客中我们会介绍如何把它们部署在云服务中和在docker容器中！</p>
 </blockquote>
-<p>下面的可能用到的命令需要提前安装，比如<a href="http://curl.haxx.se/" target="_blank" rel="external">^cURL</a>和<a href="http://stedolan.github.io/jq/" target="_blank" rel="external">^jq</a><br>每个微服务运行<strong><em>./gradlew bootRun</em></strong> 即可启动。</p>
+<p>下面的可能用到的命令需要提前安装，比如<a href="http://curl.haxx.se/" target="_blank" rel="external">cURL</a>和<a href="http://stedolan.github.io/jq/" target="_blank" rel="external">jq</a><br>每个微服务运行<strong><em>./gradlew bootRun</em></strong> 即可启动。</p>
 <p>首先我们来启动基础微服务：</p>
 <pre><code>$ <span class="built_in">cd</span> .../blog-microservices/microservices
 $ <span class="built_in">cd</span> support/discovery-server; ./gradlew bootRun 
@@ -347,8 +347,8 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 <h4 id="DYNAMIC_LOAD_BALANCING">DYNAMIC LOAD BALANCING</h4><p>为了避免因为服务故障或者网络问题引发的服务不可访问，用负载均衡启动多个同类型的服务是非常常用的手段。我们使用了动态端口分配和服务发现服务器，添加一个新实例会非常容易。我们将会启动一个新的review service然后它自动分配新的端口，并注册到服务发现服务器上。</p>
 <pre><code><span class="variable">$ </span>cd .../blog-microservices/microservices/core/review-service 
 <span class="variable">$ </span>./gradlew bootRun
-</code></pre><p>用不了多久，你就会在服务发现的web界面中看到第二个实例已经注册了(<a href="http://localhost:8761" target="_blank" rel="external">http://localhost:8761</a>):<br><img src="" alt=""></p>
-<p>如果你多运行几次之前的curl命令(curl -s localhost:8765/productcomposite/product/1 | jq .)，你会发现两个review instance的日志中会显示负载均衡已经自动工作了，并且不需要手工配置：<br><img src="" alt=""></p>
+</code></pre><p>用不了多久，你就会在服务发现的web界面中看到第二个实例已经注册了(<a href="http://localhost:8761" target="_blank" rel="external">http://localhost:8761</a>):<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/eureka-2-review-instances.png" alt=""></p>
+<p>如果你多运行几次之前的curl命令(curl -s localhost:8765/productcomposite/product/1 | jq .)，你会发现两个review instance的日志中会显示负载均衡已经自动工作了，并且不需要手工配置：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/log-from-2-review.instances.png" alt=""></p>
 <h4 id="SUMMARY">SUMMARY</h4><p>通过这篇博客，我们看到了如何使用Spring Cloud和Netflix OSS组件如何简化独立部署的微服务之间的相互连通，并且没有手工配置服务的机器端口和路由信息。新实例启动时，通过service discover server，自动被load balancer发现，然后即可接收请求。使用edge server我们可以控制哪些微服务是对外暴露的，从而建立起系统级别的API。</p>
 <h4 id="NEXT_STEP">NEXT STEP</h4><p>虽然目前看起来还不错，但是我们还有很多未解决的问题：</p>
 <ul>
@@ -421,7 +421,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
           <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>这篇博客不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">^Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
+<h3 id="译文">译文</h3><p>这篇博客不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
 <p>一个分布式系统中部署的微服务数量不断增加时与整块庞大（monothilic）服务的数量不断增加相比，新挑战的出现不会非常明显（译者注：因为微服务架构设计时照顾了水平扩展的需求）。这篇博客将会聚焦在这些大量微服务情况下出现的新挑战上，并会给大量微服务定义一个operations model。</p>
 <p>这篇博客分为如下几个部分：</p>
 <ul>
@@ -450,7 +450,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 <p>水平的看，我们也可以采用领域切分的方式。</p>
 <p>这样我们的目标系统架构会是：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-architecture.png" alt="sample target architecture"><br>注意：这只是个参考的目标系统架构，你的架构可能会和这个完全不同。关键点在于你需要建立一个目标系统架构才能开始考虑如何水平扩展（scale up）你的微服务。否则你的系统最终可能像一大碗意大利面，并且很多特性还不如现有的整块庞大（monolithic）的应用服务。</p>
 <h5 id="CONTINUOUS_DELIVERY_持续部署">CONTINUOUS DELIVERY 持续部署</h5><p>我们还假定已经有了一定程度上的持续部署工具链，这样我们就能高效可重复且高质量地驱动微服务的运行。参考图：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-2.png" alt="continues delivery"><br>(图片来源: <a href="http://www.infoq.com/minibooks/emag-devops-toolchain" target="_blank" rel="external">http://www.infoq.com/minibooks/emag-devops-toolchain</a>)</p>
-<h5 id="ORGANIZATION_组织架构">ORGANIZATION 组织架构</h5><p>最终，我们还假定我们采用了合适的组织架构来避免<a href="http://www.melconway.com/Home/Conways_Law.html" target="_blank" rel="external">^Conway’s law</a>中提到的一些问题。Conway’s law称：</p>
+<h5 id="ORGANIZATION_组织架构">ORGANIZATION 组织架构</h5><p>最终，我们还假定我们采用了合适的组织架构来避免<a href="http://www.melconway.com/Home/Conways_Law.html" target="_blank" rel="external">Conway’s law</a>中提到的一些问题。Conway’s law称：</p>
 <blockquote>
 <p>设计系统的组织，最终产生的设计等同于组织之内、之间的沟通结构。</p>
 </blockquote>
@@ -498,7 +498,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 </li>
 <li><p><strong><em>Dynamic Routing and Load Balancer 动态路由和负载均衡</em></strong><br>路由组件在配合服务发现功能后可以使用服务发现API来查询需要的服务被部署在哪里，并且负载均衡组件可以决定多个实例中的哪一个实例来响应请求。</p>
 </li>
-<li><p><strong><em>Circuit Breaker 断路器</em></strong><br>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">^Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">^Fowler - Circuit Breaker</a>。</p>
+<li><p><strong><em>Circuit Breaker 断路器</em></strong><br>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">Fowler - Circuit Breaker</a>。</p>
 </li>
 <li><p><strong><em>Monitoring 监控</em></strong><br>在断路器的配合下，我们可以监控断路器的状态，同时收集运行时信息来获得一个系统级别的健康的图谱。<br>这些信息可以在dashboard上收集和展示，并设置阈值自动报警。</p>
 </li>
@@ -506,7 +506,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 </li>
 <li><p><strong><em>Edge Server 边界服务器</em></strong><br>为了给外部暴露API服务并且防止未授权的请求访问内部服务，我们需要一个边界服务器，所有的外部访问都经过它们进入系统。边界服务器可以在上述服务发现组件的功能上复用动态路由和负载均衡的能力。边界服务器将会扮演一个动态和主动的反向代理，并且在内部系统发生变化的时候不需要手工更新。</p>
 </li>
-<li><p><strong><em>OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</em></strong><br>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">^OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
+<li><p><strong><em>OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</em></strong><br>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
 <ul>
 <li>一个新的组件作为OAuth鉴权服务器</li>
 <li>API服务会作为OAuth的资源服务器（OAuth Resource Server）</li>
@@ -517,7 +517,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 </ul>
 </li>
 </ul>
-<p>注意：随着时间的推移，OAuth 2.0标准很有可能会被<a href="http://openid.net/connect/" target="_blank" rel="external">^OpenID Connect</a>标准完全替代，来提供更好的鉴权功能。</p>
+<p>注意：随着时间的推移，OAuth 2.0标准很有可能会被<a href="http://openid.net/connect/" target="_blank" rel="external">OpenID Connect</a>标准完全替代，来提供更好的鉴权功能。</p>
 </li>
 </ul>
 <h4 id="A_reference_model_参考模型">A reference model 参考模型</h4><p>综合上述，微服务需要的基础架构需要上面提到的一些服务来支撑微服务相护的API调用。这些可以如下图来举例：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-operations-reference-model.png" alt="reference model"></p>
@@ -587,16 +587,16 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
           <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>这个系列博客涉及了构建微服务的很多方面，使用了<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">^SpringCloud</a>,<a href="http://netflix.github.io/" target="_blank" rel="external">^Netflix OSS</a>和<a href="Elasticsearch, Logstash and Kibana">^ ELK-stack</a>等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础架构上部署微服务。</p>
+<h3 id="译文">译文</h3><p>这个系列博客涉及了构建微服务的很多方面，使用了<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">SpringCloud</a>,<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>和<a href="Elasticsearch, Logstash and Kibana">ELK-stack</a>等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础架构上部署微服务。</p>
 <ul>
-<li><a href="/2015/07/27/Part-0-介绍：微服务的operations-model/">^Part 0 介绍：微服务的operations model</a></li>
-<li>Part 1: 使用 Netflix Eureka（Service Discovery）, Ribbon（Load Balancing） 和 Zuul(Gate Server) 构建微服务</li>
+<li><a href="/2015/07/27/Part-0-介绍：微服务的operations-model/">Part 0 介绍：微服务的operations model</a></li>
+<li><a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1: 使用 Netflix Eureka（Service Discovery）, Ribbon（Load Balancing） 和 Zuul(Gate Server) 构建微服务</a></li>
 <li>Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败</li>
 <li>Part 3: 使用OAuth 2.0来让API更安全</li>
 <li>Part 4: 让Microservices Docker化</li>
 </ul>
 <h3 id="译者注">译者注</h3><ul>
-<li>这个系列博客是CALLISTA公司的MAGNUS LARSSON（近30年的编程经验）所作</li>
+<li>这个系列博客是CALLISTA公司的<a href="http://callistaenterprise.se/om/medarbetare/magnuslarsson/" target="_blank" rel="external">MAGNUS LARSSON</a>（近30年的工作经验）所作</li>
 <li>这个系列博客不同于其他介绍微服务博客的地方在于，除了介绍概念，还提供了功能完备的demo，服务发现，负载均衡，接入层控制，自动化部署竟然在demo中都有体现，由浅入深，非常适合边看边动手。</li>
 <li>我很喜欢in-action类型的博客，所以征求了作者的许可，把这个系列翻译成中文，希望更多的人可以看到，翻译错误之处还望指正。</li>
 </ul>
@@ -661,7 +661,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 
       
         
-          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的<strong>基本</strong>的评审流程，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>，使用部分为chapter6，7</p>
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的<strong>基本</strong>的评审流程，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">Learning Gerrit Code Review</a>，使用部分为chapter6，7</p>
 <h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置</p>
 <h3 id="步骤">步骤</h3><ul>
 <li><p>此时你刚配置好gerrit，clone了代码，并开发了新的feature或改了一个bug，git add 修改的文件，git commit －m “描述这个feature或bug”(如果你不想每次都一个个选择修改的文件，可以把不想提交的文件放到.gitignore文件中，然后git commit -a或git commit —all)<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting8.png" alt=""></p>
@@ -676,13 +676,13 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 </li>
 <li><p>这时候需要添加评审人，可以是项目的owner和组内相同功能的backup小伙伴，他们中有权限的会看到下面的样子，＋2表示review后认为没问题，可以merge到master分支，－2表示有问题，需要修改，如果点击了＋2，页面会有submit按钮可点，点击后代码和并入对应分支（一般是master）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting15.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting14.png" alt=""></p>
 </li>
-<li><p>点击左下角的文件，review代码，然后根据自己的意见打分（<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>），如果一切顺利，admin或者owner觉得没问题，会看到下面的样子, 绿色字样Core-Review +2表示评审通过，等待admin或者owner点击submit合并到对应分支，这时候就review的提交者就可以去做别的事了，<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting16.png" alt=""></p>
+<li><p>点击左下角的文件，review代码，然后根据自己的意见打分（<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>），如果一切顺利，admin或者owner觉得没问题，会看到下面的样子, 绿色字样Core-Review +2表示评审通过，等待admin或者owner点击submit合并到对应分支，这时候就review的提交者就可以去做别的事了，<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting16.png" alt=""></p>
 </li>
 <li><p>当然，拿出来review总是要还的，如果－2分不通过，则需要看看评审人的意见，然后做出修改<br>修改完成后，git add 修改的文件, 然后执行<strong>git commit —amend</strong>，说明作出的调整，然后重新git push origin HEAD:refs/for/master发出评审<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting17.png" alt=""></p>
 </li>
 <li><p>可以看到右上角的Patch Sets变成了2，点击以后可以选择，评审页面也可以选择，review后通过后submit就可以merge代码，打回后继续修改<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting18.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting19.png" alt=""></p>
 </li>
-<li><p>如果你觉得git push origin HEAD:refs/for/master这个命令很麻烦，可以了解一下<a href="https://github.com/openstack-infra/git-review" target="_blank" rel="external">^git-review</a>这个命令行小工具</p>
+<li><p>如果你觉得git push origin HEAD:refs/for/master这个命令很麻烦，可以了解一下<a href="https://github.com/openstack-infra/git-review" target="_blank" rel="external">git-review</a>这个命令行小工具</p>
 </li>
 <li><p>如果你不喜欢命令行，喜欢用intellij idea或者eclipse或者或者其他GUI的工具，git gerrit也是有相关工具支持的，可以google一下</p>
 </li>
@@ -750,12 +750,12 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
         
           <span itemprop="articleBody"><h3 id="本文目的">本文目的</h3><p>收集一些常见资料，提炼一些重点，方便有SVN基础的小伙伴快速入门和速查</p>
 <h3 id="目标读者：">目标读者：</h3><p>你有SVN的使用经验，因为个人兴趣或者工作原因想了解GIT的基本使用</p>
-<h3 id="资料推荐：">资料推荐：</h3><p><a href="https://github.com/xirong/my-git/blob/master/why-git.md" target="_blank" rel="external">^GIT和SVN特点的详细比较</a> 介绍了GIT对比SVN的一些优点</p>
-<p><a href="http://www.ibm.com/developerworks/cn/linux/l-git-subversion-1/" target="_blank" rel="external">^面向 Subversion 用户的 Git，入门指南</a> 先从SVN的常见操作入手，再用GIT复现一遍</p>
-<p>如果你英文不错，可以看看<a href="http://git.or.cz/course/svn.html" target="_blank" rel="external">^SVN_CRASH_COURSE</a></p>
-<p>当然如果你想直接从头学习GIT，这里有个<a href="http://backlogtool.com/git-guide/cn/" target="_blank" rel="external">^猴子都能懂的GIT入门</a></p>
-<p>想了解更多，可以参考<a href="https://github.com/xirong/my-git" target="_blank" rel="external">^更多GIT资料</a></p>
-<h3 id="^常用命令对照"><a href="http://backlogtool.com/git-guide/cn/reference/git-svn.html" target="_blank" rel="external">^常用命令对照</a></h3><table>
+<h3 id="资料推荐：">资料推荐：</h3><p><a href="https://github.com/xirong/my-git/blob/master/why-git.md" target="_blank" rel="external">GIT和SVN特点的详细比较</a> 介绍了GIT对比SVN的一些优点</p>
+<p><a href="http://www.ibm.com/developerworks/cn/linux/l-git-subversion-1/" target="_blank" rel="external">面向 Subversion 用户的 Git，入门指南</a> 先从SVN的常见操作入手，再用GIT复现一遍</p>
+<p>如果你英文不错，可以看看<a href="http://git.or.cz/course/svn.html" target="_blank" rel="external">SVN_CRASH_COURSE</a></p>
+<p>当然如果你想直接从头学习GIT，这里有个<a href="http://backlogtool.com/git-guide/cn/" target="_blank" rel="external">猴子都能懂的GIT入门</a></p>
+<p>想了解更多，可以参考<a href="https://github.com/xirong/my-git" target="_blank" rel="external">更多GIT资料</a></p>
+<h3 id="常用命令对照"><a href="http://backlogtool.com/git-guide/cn/reference/git-svn.html" target="_blank" rel="external">常用命令对照</a></h3><table>
 <thead>
 <tr>
 <th style="text-align:left">操作</th>
@@ -917,11 +917,11 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 
       
         
-          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">^gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">^为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">^Learning Gerrit Code Review</a>，配置部分为chapter4</p>
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>帮助要使用gerrit的用户，完成gerrit的基本配置，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">Learning Gerrit Code Review</a>，配置部分为chapter4</p>
 <h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目</p>
 <h3 id="步骤">步骤</h3><ul>
-<li>Mac／Linux用户跳过这一步，Win用户推荐先去下载<a href="https://msysgit.github.io/" target="_blank" rel="external">^gitbash</a>,安装后，右键打开gitbash终端，不能下载的小伙伴请用 wad6到<a href="http://pan.baidu.com/s/1gdIW6hd" target="_blank" rel="external">^百度云</a>提取1.9.5版本<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png" alt=""></li>
-<li>参考<a href="https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E7%94%9F%E6%88%90-SSH-%E5%85%AC%E9%92%A5" target="_blank" rel="external">^Git-生成-SSH-公钥</a>生成SSH的public key，把~/.ssh/id_rsa.pub的内容拷贝出来，粘贴到gerrit个人配置的ssh选项中<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting5.png" alt=""></li>
+<li>Mac／Linux用户跳过这一步，Win用户推荐先去下载<a href="https://msysgit.github.io/" target="_blank" rel="external">gitbash</a>,安装后，右键打开gitbash终端，不能下载的小伙伴请用 wad6到<a href="http://pan.baidu.com/s/1gdIW6hd" target="_blank" rel="external">百度云</a>提取1.9.5版本<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting7.png" alt=""></li>
+<li>参考<a href="https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E7%94%9F%E6%88%90-SSH-%E5%85%AC%E9%92%A5" target="_blank" rel="external">Git-生成-SSH-公钥</a>生成SSH的public key，把~/.ssh/id_rsa.pub的内容拷贝出来，粘贴到gerrit个人配置的ssh选项中<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting5.png" alt=""></li>
 </ul>
 <ul>
 <li><p>点击 Projects-&gt;List到 gerrit的项目列表（admin可以创建新项目）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting1.png" alt=""></p>
@@ -935,8 +935,8 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 <li><p>拷贝那串很长的命令，或者点击命令后面的公文包按钮，粘贴到终端（win用户gitbash）中执行，看到如下结果，说明配置成功<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting6.png" alt=""></p>
 </li>
 </ul>
-<h3 id="推荐资料">推荐资料</h3><p>内部gerrit和github用不同的ssh密钥，可以参考<a href="http://www.imtao.net/2014/04/12/git-multiple-account.html" target="_blank" rel="external">^git多账号切换</a></p>
-<p><a href="http://coolshell.cn/articles/1302.html" target="_blank" rel="external">^从Code Review 谈如何做技术</a>推荐有兴趣的了解一下</p>
+<h3 id="推荐资料">推荐资料</h3><p>内部gerrit和github用不同的ssh密钥，可以参考<a href="http://www.imtao.net/2014/04/12/git-multiple-account.html" target="_blank" rel="external">git多账号切换</a></p>
+<p><a href="http://coolshell.cn/articles/1302.html" target="_blank" rel="external">从Code Review 谈如何做技术</a>推荐有兴趣的了解一下</p>
 </span>
         
       
