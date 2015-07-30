@@ -40,7 +40,7 @@
 <meta name="description" content="原文链接
 http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/
 
-译文这篇博客的不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可">
+译文这篇博客不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Part 0 介绍：微服务的operations model">
 <meta property="og:url" content="http://yoursite.com/2015/07/27/Part-0-介绍：微服务的operations-model/index.html">
@@ -48,19 +48,19 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 <meta property="og:description" content="原文链接
 http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/
 
-译文这篇博客的不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可">
+译文这篇博客不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-architecture.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-2.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-1.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-operations-reference-model.png">
-<meta property="og:updated_time" content="2015-07-27T11:42:53.000Z">
+<meta property="og:updated_time" content="2015-07-29T11:44:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Part 0 介绍：微服务的operations model">
 <meta name="twitter:description" content="原文链接
 http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/
 
-译文这篇博客的不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可">
+译文这篇博客不是微服务的介绍，这有一个很好的介绍^Fowler - Microservices给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -188,7 +188,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
         <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>这篇博客的不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">^Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
+<h3 id="译文">译文</h3><p>这篇博客不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">^Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
 <p>一个分布式系统中部署的微服务数量不断增加时与整块庞大（monothilic）服务的数量不断增加相比，新挑战的出现不会非常明显（译者注：因为微服务架构设计时照顾了水平扩展的需求）。这篇博客将会聚焦在这些大量微服务情况下出现的新挑战上，并会给大量微服务定义一个operations model。</p>
 <p>这篇博客分为如下几个部分：</p>
 <ul>
@@ -199,7 +199,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 <li>A reference model 一个参考模型</li>
 <li>Next step</li>
 </ul>
-<h4 id="Prerequisites先决条件">Prerequisites先决条件</h4><p>首先，我们来想一个问题，想要系统的运行（roll out）大量的微服务我们都需要些什么？<br>（原文：what is required to roll out large numbers of microservices in the system landscape?）</p>
+<h4 id="Prerequisites先决条件">Prerequisites先决条件</h4><p>首先，我们来想一个问题，想要系统地运行（roll out）大量的微服务我们都需要些什么？<br>（原文：what is required to roll out large numbers of microservices in the system landscape?）</p>
 <p>参考Fowler的博客，这就是我们的目标：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1.png" alt=""><br>(图片来自: <a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">http://martinfowler.com/articles/microservices.html</a>)</p>
 <p>在我们的系统中用大量微服务来替代整块庞大的服务之前，我们还需要一些必要条件：</p>
 <ul>
@@ -208,7 +208,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 <li>a proper organization 合适的组织架构</li>
 </ul>
 <p>我们来简要看下各个部分：</p>
-<h5 id="A_TARGET_ARCHITECTURE_目标系统架构">A TARGET ARCHITECTURE 目标系统架构</h5><p>首先我们需要从架构的角度考虑入如何拆分我们的微服务。<br>比如我们可以把服务垂直拆分为多个层：</p>
+<h5 id="A_TARGET_ARCHITECTURE_目标系统架构">A TARGET ARCHITECTURE 目标系统架构</h5><p>首先我们需要从架构的角度考虑如何拆分我们的微服务。<br>比如我们可以把服务垂直拆分为多个层：</p>
 <ul>
 <li>Core services 核心服务<br>处理业务数据（business data）的持久化，应用业务规则和其他逻辑</li>
 <li>Composite services 组合服务<br>组合服务不但可以协同多个核心服务来完成一些通用任务（common task），还可以从多个核心服务来整合（aggregating）信息。</li>
@@ -246,7 +246,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
 </li>
 <li><p><strong><em>如何维护最新的路由信息？</em></strong><br>在一个动态变化的系统中作服务的调用方也会面对很多挑战。特别是当我们需要手工更新路由表，并且路由表在反向代理中或者在调用者的配置文件中时。根本上说，当我们在一个持续演化的系统中，系统的新的微服务随时会在新的机器或端口创建的时候，根本没有时间来让我们手动操作路由表。手工维护的交付时间相比之下就太慢了，因为变化次数的上升，手工操作出错的风险也会相比自动化配置有不必要的提高。</p>
 </li>
-<li><p><strong><em>如何防止链式失败？（chain of failures）</em></strong><br>当微服务之间相互调用时，我们就需要对链式失败进行额外的关注。如果一个被很多服务以来的底层服务出问题了，会导致上层服务也出问题。如果不及时处理，大量服务会被一个出问题的服务拖累，导致我们的系统过于脆弱。</p>
+<li><p><strong><em>如何防止链式失败？（chain of failures）</em></strong><br>当微服务之间相互调用时，我们就需要对链式失败进行额外的关注。如果一个被很多服务依赖的底层服务出问题了，会导致上层服务也出问题。如果不及时处理，大量服务会被一个出问题的服务拖累，导致我们的系统过于脆弱。</p>
 </li>
 <li><p><strong><em>如何保证所有服务都启动并且正常运行？</em></strong><br>追踪不多的应用很容易，我们如何保证大量的微服务时，服务的健康性呢？</p>
 </li>
@@ -308,6 +308,8 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
       
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/" rel="prev">Part 1: 使用 Netflix Eureka, Ribbon 和 Zuul构建微服务</a>
             
           </div>
 
@@ -376,7 +378,7 @@ http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-mic
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>
