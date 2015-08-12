@@ -1,0 +1,730 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+    
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  <link href='//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.4"/>
+
+
+
+
+  <meta name="keywords" content="microservices,netflix oss," />
+
+
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.4" />
+
+
+<meta name="description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/
+
+译文在Part 1中，我们使用了诸如 Eureka, Ribbon和Zuul等几个Spring Cloud和Spring Cloud的核心组件，用来实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败">
+<meta property="og:url" content="http://yoursite.com/2015/08/09/Part 2：尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败/index.html">
+<meta property="og:site_name" content="doublelduob's notes">
+<meta property="og:description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/
+
+译文在Part 1中，我们使用了诸如 Eureka, Ribbon和Zuul等几个Spring Cloud和Spring Cloud的核心组件，用来实现">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-breaker.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/mapping-table.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/hystrix-sample.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/system-landscape.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/source-code.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/eureka.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/hystrix.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-closed-on-minor-error.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-open-on-major-error.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-closed-again.png">
+<meta property="og:updated_time" content="2015-08-12T17:46:15.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败">
+<meta name="twitter:description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/
+
+译文在Part 1中，我们使用了诸如 Eureka, Ribbon和Zuul等几个Spring Cloud和Spring Cloud的核心组件，用来实现">
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post'
+  };
+</script>
+
+    <title> Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败 // doublelduob's notes </title>
+</head>
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+<!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+
+
+
+
+<div class="container one-column page-post-detail">
+    <div class="headband"></div>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+        <div class="header-inner"><h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand" rel="start">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title">doublelduob's notes</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon icon-home"></i> <br />
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            <i class="menu-item-icon icon-archives"></i> <br />
+            Archives
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+        </div>
+    </header>
+
+    <main id="main" class="main">
+        <div class="main-inner">
+            <div id="content" class="content">
+                
+
+  <div id="posts" class="posts-expand">
+    
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
+              Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-08-09T22:27:30+08:00" content="2015-08-09">
+            2015-08-09
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
+<p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/</a></p>
+</blockquote>
+<h3 id="译文">译文</h3><p>在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中，我们使用了诸如 Eureka, Ribbon和Zuul等几个<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>的核心组件，用来实现我们的操作模型（operations model）使得独立部署的微服务之间可以互相通信。本片博客中，我们会关注微服务中的异常处理，使用Hystrix（Netflix的circuit breaker）来提升系统的还原能力。</p>
+<p>现在一些异常情况将会在我们<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中搭建的系统中出现。如一些复合服务依赖的核心服务会突然的不返回响应，如果不正确的处理，符合服务便会收到影响。</p>
+<p>通常我们把这类问题称为<strong>链式失败（chain of failures）</strong>，一个组件的异常会导致依赖它的其他组件一起发生异常。在基于微服务的系统中，这类问题需要额外注意。一个常见的解决方案是使用断路器模式（circuit breaker pattern），更多信息可以从<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a>这本书和<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">Fowler - Circuit Breaker</a>这篇博客中获得。一个断路器的状态转换如下：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-breaker.png" alt="circuit-breaker"><br>(Source: <a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a>)</p>
+<h4 id="SPRING_CLOUD_AND_NETFLIX_OSS">SPRING CLOUD AND NETFLIX OSS</h4><p>从<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中提到的表格中我们会用到：Hystrix，Hystrix dashboard和Turbine。<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/mapping-table.png" alt=""></p>
+<ul>
+<li><p><strong>Netflix Hystrix</strong> - Circuit breaker<br>Netflix Hystrix给服务消费者提供了断路器保护的能力。如果一个服务不响应（如超时或者通信异常导致），Hystrix可以将调用重定向到服务消费者内部的fallback方法。如果一个服务重复的响应失败，Hystrix将会打开断路功能，在后续的调用中，直接调用内部的fallback方法，在服务恢复之前不去尝试调用服务。Hystrix会允许一部分请求去尝试服务是否返回，来判断服务是否可用。Hystrix嵌入服务消费者中运行。</p>
+</li>
+<li><p><strong>Netflix Hystrix dashboard and Netflix Turbine</strong> - Monitor Dashboard<br>Hystrix dashboard可以提供一个断路器的图形化的总览试图，Turbine（在基于Eureka的功能上）可以给dashboard提供所有断路器在系统中的信息。如下是一个Hystrix dashboard和Turbine的样例：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/hystrix-sample.png" alt=""></p>
+</li>
+</ul>
+<h4 id="THE_SYSTEM_LANDSCAPE">THE SYSTEM LANDSCAPE</h4><p><a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中的系统结构会增加Hystrix dashboard和Turbine组件。product-composite服务也会使用基于Hystrix的断路器来增强。新增的两个组件在被红线标识在如下的结构图中：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/system-landscape.png" alt=""></p>
+<blockquote>
+<p>在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中，我们强调微服务和整块应用的区别在于每个服务的运行相互独立，如在不同的进程中。</p>
+</blockquote>
+<h4 id="BUILD_FROM_SOURCE">BUILD FROM SOURCE</h4><p>和<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中一样，我们使用Java SE8，Git和Gradle。执行如下命令来获取代码进行构建：</p>
+<pre><code>$ git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/callistaenterprise/blog-microservices.git
+$ <span class="keyword">cd</span> blog-microservices
+$ git checkout -<span class="keyword">b</span> B2 M2.<span class="number">1</span>
+$ ./build-<span class="keyword">all</span>.<span class="keyword">sh</span>
+</code></pre><blockquote>
+<p>如果你在Windows平台，可以执行bat-file build-all.bat!</p>
+</blockquote>
+<p>两个新的组件monitor-dashboard和turbine被加入到代码中：</p>
+<p><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/source-code.png" alt=""></p>
+<p>构建结果会显示八个成功日志：</p>
+<pre><code><span class="keyword">BUILD </span>SUCCESSFUL
+</code></pre><h4 id="SOURCE_CODE_WALKTHROUGH">SOURCE CODE WALKTHROUGH</h4><p>相比<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>新增的部分就是Hystrix在product-composite服务中作为断路器，我们会聚焦在新增的代码上。</p>
+<h5 id="GRADLE_DEPENDENCIES">GRADLE DEPENDENCIES</h5><p>我们有一些Hystrix-based starter依赖可以直接放到build file中。因为Hysteric使用RabbitMQ来让断路器和dashboard通信，我们还需额外配置一下。</p>
+<p>对于服务的消费者，想使用Hystrix作为断路器，我们需要添加：</p>
+<pre><code><span class="function"><span class="title">compile</span><span class="params">(<span class="string">"org.springframework.cloud:spring-cloud-starter-hystrix:1.0.0.RELEASE"</span>)</span></span>
+<span class="function"><span class="title">compile</span><span class="params">(<span class="string">"org.springframework.cloud:spring-cloud-starter-bus-amqp:1.0.0.RELEASE"</span>)</span></span>
+<span class="function"><span class="title">compile</span><span class="params">(<span class="string">"org.springframework.cloud:spring-cloud-netflix-hystrix-amqp:1.0.0.RELEASE"</span>)</span></span>
+</code></pre><p>完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B2/microservices/composite/product-composite-service/build.gradle" target="_blank" rel="external">product-composite-service/build.gradle.</a><br>要想启动Turbine的服务器，需要添加如下依赖：</p>
+<pre><code><span class="function"><span class="title">compile</span><span class="params">(<span class="string">'org.springframework.cloud:spring-cloud-starter-turbine-amqp:1.0.0.RELEASE'</span>)</span></span>
+</code></pre><p>完整内容请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B2/microservices/support/turbine/build.gradle" target="_blank" rel="external">turbine/build.gradle.</a></p>
+<h4 id="INFRASTRUCTURE_SERVERS">INFRASTRUCTURE SERVERS</h4><p>搭建一个Turbine服务器需要添加一个 @EnableTurbineAmqp 的注解在Spring Boot的应用上:</p>
+<pre><code><span class="annotation">@SpringBootApplication</span>
+<span class="annotation">@EnableTurbineAmqp</span>
+<span class="annotation">@EnableDiscoveryClient</span>
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TurbineApplication</span> {</span>
+
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="typename">void</span> main(String[] args) {
+        SpringApplication.run(TurbineApplication.<span class="keyword">class</span>, args);
+    }
+
+}
+</code></pre><p>完整例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B2/microservices/support/turbine/src/main/java/se/callista/microservises/support/turbine/TurbineApplication.java" target="_blank" rel="external">TurbineApplication.java</a></p>
+<p>搭建一个Hystrix Dashboard需要添加 @EnableHystrixDashboard注解。<br>这些注解就可以让我们用默认配置来开始使用了。当需要时，这些默认配置可以被指定的配置覆盖。</p>
+<h4 id="BUSINESS_SERVICES">BUSINESS SERVICES</h4><p>要启动Hystrix，需要在Spring Boot应用上使用@EnableCircuitBreaker注解。要真正使用Hystrix，我们还需要在想要监控的方法上添加@HystrixCommand的注解，并且设置一个fallback-method，如：</p>
+<pre><code>@HystrixComm<span class="subst">and</span>(fallbackMethod = <span class="string">"defaultReviews"</span>)
+<span class="keyword">public</span> ResponseEntity&lt;<span class="built_in">List</span>&lt;Review&gt;&gt; getReviews(int productId) {
+    <span class="attribute">...</span>
+}
+
+<span class="keyword">public</span> ResponseEntity&lt;<span class="built_in">List</span>&lt;Review&gt;&gt; defaultReviews(int productId) {
+    <span class="attribute">...</span>
+}
+</code></pre><p>fallback方法被Hystrix用于异常情况（调用服务的方法失败或者超时等）或者当断路器启动时候的fast fail情况。完整的例子请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B2/microservices/composite/product-composite-service/src/main/java/se/callista/microservices/composite/product/service/ProductCompositeIntegration.java" target="_blank" rel="external">ProductCompositeIntegration.java</a>。</p>
+<h4 id="START_UP_THE_SYSTEM_LANDSCAPE">START UP THE SYSTEM LANDSCAPE</h4><blockquote>
+<p>正如Part 1中提到的，我们要在本地环境启动微服务的java进程。我们需要安装<a href="http://curl.haxx.se/" target="_blank" rel="external">cURL</a>和<a href="http://stedolan.github.io/jq/" target="_blank" rel="external">jq</a>工具。</p>
+</blockquote>
+<p>如我们提过的，Hystrix使用RabbitMQ来进行内部通讯，所以我们需要在系统启动前安装并运行它。执行如下命令进行下载和安装，使用sbin目录下的rabbitmq－server程序来启动RabbitMQ：</p>
+<pre><code>$ ~/Applications/rabbitmq_server-<span class="number">3.4</span><span class="number">.3</span>/sbin/rabbitmq-server
+
+                RabbitMQ <span class="number">3.4</span><span class="number">.3</span>. Copyright (C) <span class="number">2007</span>-<span class="number">2014</span> GoPivotal, Inc.
+<span class="preprocessor">##  ##      Licensed under the MPL.  See http:<span class="comment">//www.rabbitmq.com/</span></span>
+<span class="preprocessor">##  ##</span>
+<span class="preprocessor">##########  Logs: /Users/magnus/Applications/rabbitmq_server-<span class="number">3.4</span><span class="number">.3</span>/sbin/../var/log/rabbitmq    rabbit@Magnus-MacBook-Pro.log</span>
+<span class="preprocessor">######  ##        /Users/magnus/Applications/rabbitmq_server-<span class="number">3.4</span><span class="number">.3</span>/sbin/../var/log/rabbitmq/rabbit@Magnus-MacBook-Pro-sasl.log</span>
+<span class="preprocessor">##########</span>
+                Starting broker... completed with <span class="number">6</span> plugins.
+</code></pre><blockquote>
+<p>如果使用windows，请确保RabbitMQ服务启动了。</p>
+</blockquote>
+<p>现在我们来启动整个系统，每个微服务执行 ./gradle bootRun来启动。<br>首先启动基础设施：</p>
+<pre><code>$ <span class="built_in">cd</span> support/discovery-server;  ./gradlew bootRun
+$ <span class="built_in">cd</span> support/edge-server;       ./gradlew bootRun
+$ <span class="built_in">cd</span> support/monitor-dashboard; ./gradlew bootRun
+$ <span class="built_in">cd</span> support/turbine;           ./gradlew bootRun
+</code></pre><p>然后启动业务服务：</p>
+<pre><code>$ <span class="built_in">cd</span> core/product-service;                ./gradlew bootRun
+$ <span class="built_in">cd</span> core/recommendation-service;         ./gradlew bootRun
+$ <span class="built_in">cd</span> core/review-service;                 ./gradlew bootRun
+$ <span class="built_in">cd</span> composite/product-composite-service; ./gradlew bootRun 
+</code></pre><blockquote>
+<p>如果在Windows平台，执行bat-file start-all.bat</p>
+</blockquote>
+<p>当微服务被启动然后注册到服务发现server，将会显示如下log：</p>
+<pre><code>DiscoveryClient ... - registration status: <span class="number">204</span>
+</code></pre><p>如<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中所述，我们应该能看到四个业务服务和一个edge-server在服务发现web app中(<a href="http://localhost:8761" target="_blank" rel="external">http://localhost:8761</a>):<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/eureka.png" alt=""></p>
+<p>最后，确保circuit breakers是可选的（如closed）。尝试如<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>通过edge-server调用复合服务（有简化：</p>
+<pre><code>$ curl -s localhost:<span class="number">8765</span>/productcomposite/product/<span class="number">1</span> | jq .
+{
+    <span class="string">"name"</span>: <span class="string">"name"</span>,
+    <span class="string">"productId"</span>: <span class="number">1</span>,
+    <span class="string">"recommendations"</span>: [
+        {
+            <span class="string">"author"</span>: <span class="string">"Author 1"</span>,
+        <span class="string">"rate"</span>: <span class="number">1</span>,
+        <span class="string">"recommendationId"</span>: <span class="number">0</span>
+    },
+    ...
+    ],
+    <span class="string">"reviews"</span>: [
+    {
+        <span class="string">"author"</span>: <span class="string">"Author 1"</span>,
+        <span class="string">"reviewId"</span>: <span class="number">1</span>,
+        <span class="string">"subject"</span>: <span class="string">"Subject 1"</span>
+    },
+    ...
+    ],
+    <span class="string">"weight"</span>: <span class="number">123</span>
+}
+</code></pre><p>在浏览器访问<a href="http://localhost:7979，在输入框输入" target="_blank" rel="external">http://localhost:7979，在输入框输入</a> <a href="http://localhost:8989/turbine.stream" target="_blank" rel="external">http://localhost:8989/turbine.stream</a> 点击“Monitor Stream”按钮）：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/hystrix.png" alt=""></p>
+<p>我们能看到复合服务有三个circuit breaker在运转，每个复合服务的依赖都有一个。我们现在来尝试一个失败的测试，来触发circuit breaker。</p>
+<h4 id="SOMETHING_GOES_WRONG">SOMETHING GOES WRONG</h4><p>停掉 review 微服务然后重试如下命令：</p>
+<pre><code>$ curl -s localhost:<span class="number">8765</span>/productcomposite/product/<span class="number">1</span> | jq .
+{
+    <span class="string">"name"</span>: <span class="string">"name"</span>,
+    <span class="string">"productId"</span>: <span class="number">1</span>,
+    <span class="string">"recommendations"</span>: [
+    {
+        <span class="string">"author"</span>: <span class="string">"Author 1"</span>,
+        <span class="string">"rate"</span>: <span class="number">1</span>,
+        <span class="string">"recommendationId"</span>: <span class="number">0</span>
+    },
+    ...
+    ],
+    <span class="string">"reviews"</span>: null,
+    <span class="string">"weight"</span>: <span class="number">123</span>
+}
+</code></pre><p>review部分的响应（response）现在是空的了，但是其他部分仍然是完整的。我们来看下product-composite服务的日志，你会看到如下警告：</p>
+<pre><code><span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">13</span>:<span class="number">36.344</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">13</span>:<span class="number">36.497</span>  INFO <span class="number">29901</span> --- [teIntegration-<span class="number">2</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetReviews...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">13</span>:<span class="number">36.498</span>  WARN <span class="number">29901</span> --- [teIntegration-<span class="number">2</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.composite</span><span class="class">.product</span><span class="class">.service</span><span class="class">.Util</span>     : Failed to resolve serviceId <span class="string">'review'</span>. Fallback to URL <span class="string">'http://localhost:8081/review'</span>.
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">13</span>:<span class="number">36.500</span>  WARN <span class="number">29901</span> --- [teIntegration-<span class="number">2</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+</code></pre><p>circuit breaker发现了review服务的问题，把请求路由到服务调用者的fallback方法。在这个例子里，我们仅仅return null，但是我们也可以在review service不可用时返回一个缓存数据。</p>
+<p>error的频率很低，所以circuit breaker没有开启：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-closed-on-minor-error.png" alt=""></p>
+<p>我们来增加error的发生频率，Hystrix会打开circuit然后快速失败防止请求阻塞（我们使用Hystrix的默认值来让blog中的内容尽量简洁）。我们用Apache HTTP服务器的benchmarking工具来测试：</p>
+<pre><code>ab -n <span class="number">30</span> -c <span class="number">5</span> localhost:<span class="number">8765</span>/productcomposite/product/<span class="number">1</span>
+</code></pre><p>现在断路器将会被激活：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-open-on-major-error.png" alt=""></p>
+<p>后续的调用都会快速失败，circuit breaker会被重定向到fallback方法，不会去调用review服务。log将不会显示GetReviews的日志信息：</p>
+<pre><code><span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">14</span>:<span class="number">03.930</span>  INFO <span class="number">29901</span> --- [teIntegration-<span class="number">5</span>] s.c.m.c.p.s.ProductCompositeIntegration  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">14</span>:<span class="number">03.984</span>  WARN <span class="number">29901</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">62</span>] s.c.m.c.p.s.ProductCompositeIntegration  : Using fallback method <span class="keyword">for</span> review-service
+</code></pre><p>circuit breaker会让一部分请求通过，去检查服务是否已经恢复。我们可以重复的用curl请求来看product-composite服务的日志：</p>
+<pre><code><span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">33.587</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">33.769</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetReviews...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">33.769</span>  WARN <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.composite</span><span class="class">.product</span><span class="class">.service</span><span class="class">.Util</span>     : Failed to resolve serviceId <span class="string">'review'</span>. Fallback to URL <span class="string">'http://localhost:8081/review'</span>.
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">33.770</span>  WARN <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">34.431</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">34.569</span>  WARN <span class="number">29901</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">18</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">35.209</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">35.402</span>  WARN <span class="number">29901</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">20</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">36.043</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">36.192</span>  WARN <span class="number">29901</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">21</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">36.874</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">37.031</span>  WARN <span class="number">29901</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">22</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">41.148</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetRecommendations...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">41.340</span>  INFO <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : GetReviews...
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">41.340</span>  WARN <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.composite</span><span class="class">.product</span><span class="class">.service</span><span class="class">.Util</span>     : Failed to resolve serviceId <span class="string">'review'</span>. Fallback to URL <span class="string">'http://localhost:8081/review'</span>.
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">02</span> <span class="number">15</span>:<span class="number">17</span>:<span class="number">41.341</span>  WARN <span class="number">29901</span> --- [eIntegration-<span class="number">10</span>] s<span class="class">.c</span><span class="class">.m</span><span class="class">.c</span><span class="class">.p</span><span class="class">.s</span><span class="class">.ProductCompositeIntegration</span>  : Using fallback method <span class="keyword">for</span> review-service
+</code></pre><p>我们能从log中看出，每五个请求有一个允许访问review service（仍然没有成功）：</p>
+<p>让我们重新启动review服务，重新调用复合服务</p>
+<p>注意：可能需要一些耐心，服务发现server（Eureka）和动态路由（Ribbon）必须要被review服务实例告知已经恢复服务，然后请求才能成功。</p>
+<p>现在我们看到请求已经成功了。review的部分已经出现在response里面，断路器已经关闭了：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-closed-again.png" alt=""></p>
+<h4 id="SUMMARY">SUMMARY</h4><p>我们已经看到Netflix Hystrix可以被用做circuit breaker来高效的处理链式失败请求问题。Spring Cloud提供了非常方便的注解和starter依赖使得Hystrix可以很容易的集成到Spring的环境中。最后Hystrix dashboard和Turbine给了我们监控了整个系统的请求状态的能力。</p>
+<h4 id="NEXT_STEP">NEXT STEP</h4><p>在<a href="/2015/07/26/Building-Microservices系列博客/">系列博客</a>的下一篇，我们会尝试使用OAuth 2.0来为我们暴露的外部API提供访问限制功能。<br>Stay tuned!</p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/microservices/" rel="tag">#microservices</a>
+          
+            <a href="/tags/netflix-oss/" rel="tag">#netflix oss</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/" rel="next">Part 1: 使用 Netflix Eureka, Ribbon 和 Zuul构建微服务</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+            </div>
+
+            
+
+            
+              <div class="comments" id="comments">
+                
+              </div>
+            
+        </div>
+
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table Of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="/images/avatar.jpg" alt="doublelduob" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">doublelduob</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description"></p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">categories</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">tags</span>
+              
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#原文链接"><span class="nav-number">1.</span> <span class="nav-text">原文链接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#译文"><span class="nav-number">2.</span> <span class="nav-text">译文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SPRING_CLOUD_AND_NETFLIX_OSS"><span class="nav-number">2.1.</span> <span class="nav-text">SPRING CLOUD AND NETFLIX OSS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#THE_SYSTEM_LANDSCAPE"><span class="nav-number">2.2.</span> <span class="nav-text">THE SYSTEM LANDSCAPE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BUILD_FROM_SOURCE"><span class="nav-number">2.3.</span> <span class="nav-text">BUILD FROM SOURCE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOURCE_CODE_WALKTHROUGH"><span class="nav-number">2.4.</span> <span class="nav-text">SOURCE CODE WALKTHROUGH</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#GRADLE_DEPENDENCIES"><span class="nav-number">2.4.1.</span> <span class="nav-text">GRADLE DEPENDENCIES</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#INFRASTRUCTURE_SERVERS"><span class="nav-number">2.5.</span> <span class="nav-text">INFRASTRUCTURE SERVERS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BUSINESS_SERVICES"><span class="nav-number">2.6.</span> <span class="nav-text">BUSINESS SERVICES</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#START_UP_THE_SYSTEM_LANDSCAPE"><span class="nav-number">2.7.</span> <span class="nav-text">START UP THE SYSTEM LANDSCAPE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOMETHING_GOES_WRONG"><span class="nav-number">2.8.</span> <span class="nav-text">SOMETHING GOES WRONG</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SUMMARY"><span class="nav-number">2.9.</span> <span class="nav-text">SUMMARY</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NEXT_STEP"><span class="nav-number">2.10.</span> <span class="nav-text">NEXT STEP</span></a></li></ol></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+    </main>
+
+    <footer id="footer" class="footer">
+        <div class="footer-inner">
+            <div class="copyright" >
+  
+  &copy; &nbsp; 
+  <span itemprop="copyrightYear">2015</span>
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doublelduob</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+        </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+</div>
+
+<script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+  
+    
+    
+
+  
+
+
+  
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.4"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.4"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js?v=0.4.4" id="motion.global"></script>
+
+
+
+  <script type="text/javascript" src="/js/search-toggle.js"></script>
+
+
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.4" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (CONFIG.sidebar === 'always') {
+            displaySidebar();
+        }
+    });
+</script>
+
+
+
+
+
+
+
+
+<!-- lazyload -->
+<script type="text/javascript" src="/js/lazyload.js"></script>
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery("#posts img").lazyload({
+            placeholder: "/images/loading.gif",
+            effect: "fadeIn"
+        });
+    });
+</script>
+</body>
+</html>

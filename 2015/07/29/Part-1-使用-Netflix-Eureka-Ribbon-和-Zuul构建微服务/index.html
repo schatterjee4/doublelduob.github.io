@@ -55,7 +55,7 @@ http://callistaenterprise.se/blogg/teknik/2015/04/10/building-microservices-with
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/eureka.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/eureka-2-review-instances.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/log-from-2-review.instances.png">
-<meta property="og:updated_time" content="2015-07-30T01:03:20.000Z">
+<meta property="og:updated_time" content="2015-08-09T10:59:24.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Part 1: 使用 Netflix Eureka, Ribbon 和 Zuul构建微服务">
 <meta name="twitter:description" content="原文链接
@@ -189,7 +189,7 @@ http://callistaenterprise.se/blogg/teknik/2015/04/10/building-microservices-with
         <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/10/building-microservices-with-spring-cloud-and-netflix-oss-part-1/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/10/building-microservices-with-spring-cloud-and-netflix-oss-part-1/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>在<a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">前面的博客中</a>，我们定义了使用微服务时的operations model。在这篇博客中，我们来看一下如何用<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>来实现这个模型（model）。我们会涉及operations model中的几个核心部分：服务发现（service discovery），动态代理(dynamic routing)，负载均衡(load balancing)和边界服务器(edge server)，其他部分会在后续的博客中体现。</p>
+<h3 id="译文">译文</h3><p>在<a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">前面的博客中</a>，我们定义了使用微服务时的operations model。在这篇博客中，我们来看一下如何用<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>来实现这个模型（model）。我们会涉及operations model中的几个核心部分：服务发现（service discovery），动态路由(dynamic routing)，负载均衡(load balancing)和边界服务器(edge server)，其他部分会在后续的博客中体现。</p>
 <p>我们会使用Spring Cloud和Nexflix OSS中的一些核心组件，来让我们独立部署的微服务之间的交互时不用手工管理，比如管理每个微服务跑在哪个机器哪个端口，或者管理之间的路由关系。我们的微服务会在启动时设定一个动态分配的端口区间来防止端口冲突。我们还会用一个边界服务器作为入口，通过它来允许访问我们的微服务。</p>
 <p>首先我们会简单的介绍Spring Could和Netflix OSS组件，之后我们将会给出一个这个系列博客都不断完善的系统结构。我们会从获取代码，编译构建开始，然后简单讲解代码中重要的部分，最终我们会简单的做一些测试来展示如何访问我们的微服务。启动新的微服务实例并让负载均衡组件工作都是非常容易的，不需要我们手工的配置。</p>
 <h4 id="SPRING_CLOUD_AND_NETFLIX_OSS">SPRING CLOUD AND NETFLIX OSS</h4><p>Spring Cloud是<a href="http://spring.io/projects" target="_blank" rel="external">spring.io family</a>中的<a href="https://spring.io/blog/2015/03/04/spring-cloud-1-0-0-available-now" target="_blank" rel="external">新项目</a>，它里面的一些组件会被我们用到。Spring Cloud 1.0 很大部分上基于<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>的开源组件。Spring Cloud用非常友好的<strong>自动配置</strong>和<strong>约定优于配置（convention over configuration）</strong>的方法集成了Netflix的组件到Spring环境中，这些友好的方式和<a href="http://callistaenterprise.se/blogg/teknik/2014/04/15/a-first-look-at-spring-boot/" target="_blank" rel="external">Spring Boot</a>的设计理念一致。</p>
@@ -387,6 +387,8 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2015/08/09/Part 2：尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败/" rel="prev">Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败</a>
+            
           </div>
 
           <div class="post-nav-next post-nav-item">
@@ -454,7 +456,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">7</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>
