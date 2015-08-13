@@ -1,0 +1,647 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+    
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  <link href='//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.4"/>
+
+
+
+
+  <meta name="keywords" content="Hexo,next" />
+
+
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.4" />
+
+
+<meta name="description">
+<meta property="og:type" content="website">
+<meta property="og:title" content="doublelduob's notes">
+<meta property="og:url" content="http://yoursite.com/page/2/index.html">
+<meta property="og:site_name" content="doublelduob's notes">
+<meta property="og:description">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="doublelduob's notes">
+<meta name="twitter:description">
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post'
+  };
+</script>
+
+    <title> doublelduob's notes </title>
+</head>
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+<!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+
+
+
+
+<div class="container one-column 
+   page-home 
+">
+    <div class="headband"></div>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+        <div class="header-inner"><h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand" rel="start">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title">doublelduob's notes</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon icon-home"></i> <br />
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            <i class="menu-item-icon icon-archives"></i> <br />
+            Archives
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+        </div>
+    </header>
+
+    <main id="main" class="main">
+        <div class="main-inner">
+            <div id="content" class="content">
+                
+  <section id="posts" class="posts-expand">
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
+              <a class="post-title-link" href="/2015/07/26/Building-Microservices系列博客/" itemprop="url">
+                Building Microservices系列博客
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-07-26T21:18:05+08:00" content="2015-07-26">
+            2015-07-26
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
+<p><a href="http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/05/20/blog-series-building-microservices/</a></p>
+</blockquote>
+<h3 id="译文">译文</h3><p>这个系列博客涉及了构建微服务的很多方面，使用了<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">SpringCloud</a>,<a href="http://netflix.github.io/" target="_blank" rel="external">Netflix OSS</a>和<a href="Elasticsearch, Logstash and Kibana">ELK-stack</a>等工具。不仅如此，这个系列博客还介绍了如何使用docker容器在云服务，应用平台和基础架构上部署微服务。</p>
+<ul>
+<li><a href="/2015/07/27/Part-0-介绍：微服务的operations-model/">Part 0 介绍：微服务的operations model</a></li>
+<li><a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1: 使用 Netflix Eureka（Service Discovery）, Ribbon（Load Balancing） 和 Zuul(Gate Server) 构建微服务</a></li>
+<li>Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败</li>
+<li>Part 3: 使用OAuth 2.0来让API更安全</li>
+<li>Part 4: 让Microservices Docker化</li>
+</ul>
+<h3 id="译者注">译者注</h3><ul>
+<li>这个系列博客是CALLISTA公司的<a href="http://callistaenterprise.se/om/medarbetare/magnuslarsson/" target="_blank" rel="external">MAGNUS LARSSON</a>（近30年的工作经验）所作</li>
+<li>这个系列博客不同于其他介绍微服务博客的地方在于，除了介绍概念，还提供了功能完备的demo，服务发现，负载均衡，接入层控制，自动化部署竟然在demo中都有体现，由浅入深，非常适合边看边动手。</li>
+<li>我很喜欢in-action类型的博客，所以征求了作者的许可，把这个系列翻译成中文，希望更多的人可以看到，翻译错误之处还望指正。</li>
+</ul>
+</span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
+              <a class="post-title-link" href="/2015/07/18/gerrit使用入门（常用操作）/" itemprop="url">
+                gerrit使用入门（常用操作）
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-07-18T09:01:02+08:00" content="2015-07-18">
+            2015-07-18
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody"><h3 id="目的">目的</h3><p>在完成gerrit的基本配置之后，帮助用户熟悉gerrit的<strong>基本</strong>的评审流程，不会涉及<a href="https://zh.wikipedia.org/wiki/Gerrit" target="_blank" rel="external">gerrit是什么</a>，<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>的部分，更详细的gerrit的使用，可以参考<a href="http://www.amazon.com/Learning-Gerrit-Code-Review-Milanesio/dp/1783289473/ref=sr_1_1?ie=UTF8&amp;qid=1437121485&amp;sr=8-1&amp;keywords=gerrit" target="_blank" rel="external">Learning Gerrit Code Review</a>，使用部分为chapter6，7</p>
+<h3 id="准备">准备</h3><p>已经有可用的gerrit服务，并且有权限clone上面的某个项目，并完成的基本配置</p>
+<h3 id="步骤">步骤</h3><ul>
+<li><p>此时你刚配置好gerrit，clone了代码，并开发了新的feature或改了一个bug，git add 修改的文件，git commit －m “描述这个feature或bug”(如果你不想每次都一个个选择修改的文件，可以把不想提交的文件放到.gitignore文件中，然后git commit -a或git commit —all)<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting8.png" alt=""></p>
+</li>
+<li><p>运行git log，查看提交纪录，会看到里面有<strong>Change-Id</strong>这部分内容，这个Change-Id是gerrit用来标识一次修改的，如果没有看到，可以参考配置部分，拷贝那条clone命令的后半段，如scp -p -P 29418 user@host:hooks/commit-msg demo/.git/hooks/在项目的<strong>上级目录(执行clone的目录)</strong>执行，失败说明SSH配置不成功，参考配置部分SSH设置<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting9.png" alt=""></p>
+</li>
+<li><p>提交前先更新代码，建议运行git pull -r（r表示rebase，如果你还不太了解git的分支，或者你的gerrit项目禁用了merge提交需要rebase代码，直接pull下来会形成本地merge），然后运行git push origin HEAD:refs/for/master（如果不是master分支，refs/for/分支名），把修改提交到gerrit中repo的master分支上<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting11.png" alt=""></p>
+</li>
+<li><p>打开里面的链接，进入gerrit的web页面，如果你不是项目的owner或者admin，那么你看到的应该是下面的样子<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting12.png" alt=""></p>
+</li>
+<li><p>点开replay按钮的样子，＋1表示你review后认为代码变更没问题，－1表示有问题，然后加上自己的评论，0表示路过<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting13.png" alt=""></p>
+</li>
+<li><p>这时候需要添加评审人，可以是项目的owner和组内相同功能的backup小伙伴，他们中有权限的会看到下面的样子，＋2表示review后认为没问题，可以merge到master分支，－2表示有问题，需要修改，如果点击了＋2，页面会有submit按钮可点，点击后代码和并入对应分支（一般是master）<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting15.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting14.png" alt=""></p>
+</li>
+<li><p>点击左下角的文件，review代码，然后根据自己的意见打分（<a href="http://www.vaikan.com/things-everyone-should-do-code-review/" target="_blank" rel="external">为什么要codereview</a>），如果一切顺利，admin或者owner觉得没问题，会看到下面的样子, 绿色字样Core-Review +2表示评审通过，等待admin或者owner点击submit合并到对应分支，这时候就review的提交者就可以去做别的事了，<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting16.png" alt=""></p>
+</li>
+<li><p>当然，拿出来review总是要还的，如果－2分不通过，则需要看看评审人的意见，然后做出修改<br>修改完成后，git add 修改的文件, 然后执行<strong>git commit —amend</strong>，说明作出的调整，然后重新git push origin HEAD:refs/for/master发出评审<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting17.png" alt=""></p>
+</li>
+<li><p>可以看到右上角的Patch Sets变成了2，点击以后可以选择，评审页面也可以选择，review后通过后submit就可以merge代码，打回后继续修改<br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting18.png" alt=""><br><img src="http://7xkfk9.com1.z0.glb.clouddn.com/githubpages_gerrit_setting19.png" alt=""></p>
+</li>
+<li><p>如果你觉得git push origin HEAD:refs/for/master这个命令很麻烦，可以了解一下<a href="https://github.com/openstack-infra/git-review" target="_blank" rel="external">git-review</a>这个命令行小工具</p>
+</li>
+<li><p>如果你不喜欢命令行，喜欢用intellij idea或者eclipse或者或者其他GUI的工具，git gerrit也是有相关工具支持的，可以google一下</p>
+</li>
+</ul>
+</span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
+              <a class="post-title-link" href="/2015/07/17/给SVN用户看的GIT使用入门/" itemprop="url">
+                给SVN用户看的GIT使用入门
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-07-17T12:37:32+08:00" content="2015-07-17">
+            2015-07-17
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody"><h3 id="本文目的">本文目的</h3><p>收集一些常见资料，提炼一些重点，方便有SVN基础的小伙伴快速入门和速查</p>
+<h3 id="目标读者：">目标读者：</h3><p>你有SVN的使用经验，因为个人兴趣或者工作原因想了解GIT的基本使用</p>
+<h3 id="资料推荐：">资料推荐：</h3><p><a href="https://github.com/xirong/my-git/blob/master/why-git.md" target="_blank" rel="external">GIT和SVN特点的详细比较</a> 介绍了GIT对比SVN的一些优点</p>
+<p><a href="http://www.ibm.com/developerworks/cn/linux/l-git-subversion-1/" target="_blank" rel="external">面向 Subversion 用户的 Git，入门指南</a> 先从SVN的常见操作入手，再用GIT复现一遍</p>
+<p>如果你英文不错，可以看看<a href="http://git.or.cz/course/svn.html" target="_blank" rel="external">SVN_CRASH_COURSE</a></p>
+<p>当然如果你想直接从头学习GIT，这里有个<a href="http://backlogtool.com/git-guide/cn/" target="_blank" rel="external">猴子都能懂的GIT入门</a></p>
+<p>想了解更多，可以参考<a href="https://github.com/xirong/my-git" target="_blank" rel="external">更多GIT资料</a></p>
+<h3 id="常用命令对照"><a href="http://backlogtool.com/git-guide/cn/reference/git-svn.html" target="_blank" rel="external">常用命令对照</a></h3><table>
+<thead>
+<tr>
+<th style="text-align:left">操作</th>
+<th style="text-align:center">Git</th>
+<th style="text-align:right">Subversion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">迁出</td>
+<td style="text-align:center">git clone</td>
+<td style="text-align:right">svn checkout</td>
+</tr>
+<tr>
+<td style="text-align:left">提交</td>
+<td style="text-align:center">git commit</td>
+<td style="text-align:right">svn commit</td>
+</tr>
+<tr>
+<td style="text-align:left">查看提交的详细记录</td>
+<td style="text-align:center">git show</td>
+<td style="text-align:right">svn cat</td>
+</tr>
+<tr>
+<td style="text-align:left">确认状态</td>
+<td style="text-align:center">git status</td>
+<td style="text-align:right">svn status</td>
+</tr>
+<tr>
+<td style="text-align:left">确认差异</td>
+<td style="text-align:center">git diff</td>
+<td style="text-align:right">svn diff</td>
+</tr>
+<tr>
+<td style="text-align:left">确认记录</td>
+<td style="text-align:center">git log</td>
+<td style="text-align:right">svn log</td>
+</tr>
+<tr>
+<td style="text-align:left">添加</td>
+<td style="text-align:center">git add</td>
+<td style="text-align:right">svn add</td>
+</tr>
+<tr>
+<td style="text-align:left">移动</td>
+<td style="text-align:center">git mv</td>
+<td style="text-align:right">svn mv</td>
+</tr>
+<tr>
+<td style="text-align:left">删除</td>
+<td style="text-align:center">git rm</td>
+<td style="text-align:right">svn rm</td>
+</tr>
+<tr>
+<td style="text-align:left">取消修改</td>
+<td style="text-align:center">git checkout / git reset</td>
+<td style="text-align:right">svn revert (※1)</td>
+</tr>
+<tr>
+<td style="text-align:left">创建分支</td>
+<td style="text-align:center">git branch</td>
+<td style="text-align:right">svn copy (※2)</td>
+</tr>
+<tr>
+<td style="text-align:left">切换分支</td>
+<td style="text-align:center">git checkout</td>
+<td style="text-align:right">svn switch</td>
+</tr>
+<tr>
+<td style="text-align:left">合并</td>
+<td style="text-align:center">git merge</td>
+<td style="text-align:right">svn merge</td>
+</tr>
+<tr>
+<td style="text-align:left">创建标签</td>
+<td style="text-align:center">git tag</td>
+<td style="text-align:right">svn copy (※2)</td>
+</tr>
+<tr>
+<td style="text-align:left">更新</td>
+<td style="text-align:center">git pull / git fetch</td>
+<td style="text-align:right">svn update</td>
+</tr>
+<tr>
+<td style="text-align:left">反映到远端</td>
+<td style="text-align:center">git push</td>
+<td style="text-align:right">svn commit (※3)</td>
+</tr>
+<tr>
+<td style="text-align:left">忽略档案目录</td>
+<td style="text-align:center">.gitignore</td>
+<td style="text-align:right">.svnignore</td>
+</tr>
+</tbody>
+</table>
+<pre><code>※<span class="number">1.</span> SVN的revert是用来取消修改，但Git的revert是用来消除提交。所以即使是同样的命令，在SVN和Git里的含义是不同的。
+
+※<span class="number">2.</span> SVN的分支与标签在构造上是相同的，但在Git其构造明显是不一样的。
+
+※<span class="number">3.</span> SVN没有本地数据库/远程数据库的概念，所以提交会马上反映到远程里。但Git的本地数据库和远程数据库的反映方法是不一样的。
+</code></pre></span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/">&laquo;</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">&raquo;</a>
+  </nav>
+
+
+            </div>
+
+            
+
+            
+        </div>
+
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      <section class="site-overview">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="/images/avatar.jpg" alt="doublelduob" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">doublelduob</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description"></p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">categories</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">tags</span>
+              
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+
+    </div>
+  </aside>
+
+
+    </main>
+
+    <footer id="footer" class="footer">
+        <div class="footer-inner">
+            <div class="copyright" >
+  
+  &copy; &nbsp; 
+  <span itemprop="copyrightYear">2015</span>
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doublelduob</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+        </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+</div>
+
+<script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+  
+  
+  
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.4"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.4"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js?v=0.4.4" id="motion.global"></script>
+
+
+
+  <script type="text/javascript" src="/js/search-toggle.js"></script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (CONFIG.sidebar === 'always') {
+            displaySidebar();
+        }
+    });
+</script>
+
+
+
+
+  
+  
+
+  
+
+
+
+
+
+
+
+<!-- lazyload -->
+<script type="text/javascript" src="/js/lazyload.js"></script>
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery("#posts img").lazyload({
+            placeholder: "/images/loading.gif",
+            effect: "fadeIn"
+        });
+    });
+</script>
+</body>
+</html>
