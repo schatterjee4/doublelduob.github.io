@@ -144,6 +144,175 @@
           
           
             
+              <a class="post-title-link" href="/2015/07/17/给SVN用户看的GIT使用入门/" itemprop="url">
+                给SVN用户看的GIT使用入门
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-07-17T12:37:32+08:00" content="2015-07-17">
+            2015-07-17
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody"><h3 id="本文目的">本文目的</h3><p>收集一些常见资料，提炼一些重点，方便有SVN基础的小伙伴快速入门和速查</p>
+<h3 id="目标读者：">目标读者：</h3><p>你有SVN的使用经验，因为个人兴趣或者工作原因想了解GIT的基本使用</p>
+<h3 id="资料推荐：">资料推荐：</h3><p><a href="https://github.com/xirong/my-git/blob/master/why-git.md" target="_blank" rel="external">GIT和SVN特点的详细比较</a> 介绍了GIT对比SVN的一些优点</p>
+<p><a href="http://www.ibm.com/developerworks/cn/linux/l-git-subversion-1/" target="_blank" rel="external">面向 Subversion 用户的 Git，入门指南</a> 先从SVN的常见操作入手，再用GIT复现一遍</p>
+<p>如果你英文不错，可以看看<a href="http://git.or.cz/course/svn.html" target="_blank" rel="external">SVN_CRASH_COURSE</a></p>
+<p>当然如果你想直接从头学习GIT，这里有个<a href="http://backlogtool.com/git-guide/cn/" target="_blank" rel="external">猴子都能懂的GIT入门</a></p>
+<p>想了解更多，可以参考<a href="https://github.com/xirong/my-git" target="_blank" rel="external">更多GIT资料</a></p>
+<h3 id="常用命令对照"><a href="http://backlogtool.com/git-guide/cn/reference/git-svn.html" target="_blank" rel="external">常用命令对照</a></h3><table>
+<thead>
+<tr>
+<th style="text-align:left">操作</th>
+<th style="text-align:center">Git</th>
+<th style="text-align:right">Subversion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">迁出</td>
+<td style="text-align:center">git clone</td>
+<td style="text-align:right">svn checkout</td>
+</tr>
+<tr>
+<td style="text-align:left">提交</td>
+<td style="text-align:center">git commit</td>
+<td style="text-align:right">svn commit</td>
+</tr>
+<tr>
+<td style="text-align:left">查看提交的详细记录</td>
+<td style="text-align:center">git show</td>
+<td style="text-align:right">svn cat</td>
+</tr>
+<tr>
+<td style="text-align:left">确认状态</td>
+<td style="text-align:center">git status</td>
+<td style="text-align:right">svn status</td>
+</tr>
+<tr>
+<td style="text-align:left">确认差异</td>
+<td style="text-align:center">git diff</td>
+<td style="text-align:right">svn diff</td>
+</tr>
+<tr>
+<td style="text-align:left">确认记录</td>
+<td style="text-align:center">git log</td>
+<td style="text-align:right">svn log</td>
+</tr>
+<tr>
+<td style="text-align:left">添加</td>
+<td style="text-align:center">git add</td>
+<td style="text-align:right">svn add</td>
+</tr>
+<tr>
+<td style="text-align:left">移动</td>
+<td style="text-align:center">git mv</td>
+<td style="text-align:right">svn mv</td>
+</tr>
+<tr>
+<td style="text-align:left">删除</td>
+<td style="text-align:center">git rm</td>
+<td style="text-align:right">svn rm</td>
+</tr>
+<tr>
+<td style="text-align:left">取消修改</td>
+<td style="text-align:center">git checkout / git reset</td>
+<td style="text-align:right">svn revert (※1)</td>
+</tr>
+<tr>
+<td style="text-align:left">创建分支</td>
+<td style="text-align:center">git branch</td>
+<td style="text-align:right">svn copy (※2)</td>
+</tr>
+<tr>
+<td style="text-align:left">切换分支</td>
+<td style="text-align:center">git checkout</td>
+<td style="text-align:right">svn switch</td>
+</tr>
+<tr>
+<td style="text-align:left">合并</td>
+<td style="text-align:center">git merge</td>
+<td style="text-align:right">svn merge</td>
+</tr>
+<tr>
+<td style="text-align:left">创建标签</td>
+<td style="text-align:center">git tag</td>
+<td style="text-align:right">svn copy (※2)</td>
+</tr>
+<tr>
+<td style="text-align:left">更新</td>
+<td style="text-align:center">git pull / git fetch</td>
+<td style="text-align:right">svn update</td>
+</tr>
+<tr>
+<td style="text-align:left">反映到远端</td>
+<td style="text-align:center">git push</td>
+<td style="text-align:right">svn commit (※3)</td>
+</tr>
+<tr>
+<td style="text-align:left">忽略档案目录</td>
+<td style="text-align:center">.gitignore</td>
+<td style="text-align:right">.svnignore</td>
+</tr>
+</tbody>
+</table>
+<pre><code>※<span class="number">1.</span> SVN的revert是用来取消修改，但Git的revert是用来消除提交。所以即使是同样的命令，在SVN和Git里的含义是不同的。
+
+※<span class="number">2.</span> SVN的分支与标签在构造上是相同的，但在Git其构造明显是不一样的。
+
+※<span class="number">3.</span> SVN没有本地数据库/远程数据库的概念，所以提交会马上反映到远程里。但Git的本地数据库和远程数据库的反映方法是不一样的。
+</code></pre></span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
               <a class="post-title-link" href="/2015/07/17/gerrit使用入门（配置）/" itemprop="url">
                 gerrit使用入门（配置）
               </a>
@@ -253,7 +422,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>

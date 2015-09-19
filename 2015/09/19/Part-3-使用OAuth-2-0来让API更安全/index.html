@@ -1,0 +1,787 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+    
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  <link href='//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.4"/>
+
+
+
+
+  <meta name="keywords" content="microservices,netflix oss," />
+
+
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.4" />
+
+
+<meta name="description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&amp;#39;s%20with%20OAuth/
+
+译文在本篇博客中，我们使用OAuth2.0创建一个安全的API来让外部访问到我们在Part 1和Part 2中创建的微服务。
+关于OAuth 2.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Part 3: 使用OAuth 2.0来让API更安全">
+<meta property="og:url" content="http://yoursite.com/2015/09/19/Part-3-使用OAuth-2-0来让API更安全/index.html">
+<meta property="og:site_name" content="doublelduob's notes">
+<meta property="og:description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&amp;#39;s%20with%20OAuth/
+
+译文在本篇博客中，我们使用OAuth2.0创建一个安全的API来让外部访问到我们在Part 1和Part 2中创建的微服务。
+关于OAuth 2.">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/system-landscape.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/source-code.png">
+<meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/grant-flows.png">
+<meta property="og:updated_time" content="2015-09-19T17:16:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Part 3: 使用OAuth 2.0来让API更安全">
+<meta name="twitter:description" content="原文链接
+http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&amp;#39;s%20with%20OAuth/
+
+译文在本篇博客中，我们使用OAuth2.0创建一个安全的API来让外部访问到我们在Part 1和Part 2中创建的微服务。
+关于OAuth 2.">
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post'
+  };
+</script>
+
+    <title> Part 3: 使用OAuth 2.0来让API更安全 // doublelduob's notes </title>
+</head>
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+<!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+
+
+
+
+<div class="container one-column page-post-detail">
+    <div class="headband"></div>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+        <div class="header-inner"><h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand" rel="start">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title">doublelduob's notes</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon icon-home"></i> <br />
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            <i class="menu-item-icon icon-archives"></i> <br />
+            Archives
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+        </div>
+    </header>
+
+    <main id="main" class="main">
+        <div class="main-inner">
+            <div id="content" class="content">
+                
+
+  <div id="posts" class="posts-expand">
+    
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
+              Part 3: 使用OAuth 2.0来让API更安全
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-09-19T14:49:48+08:00" content="2015-09-19">
+            2015-09-19
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
+<p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&#39;s%20with%20OAuth/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&#39;s%20with%20OAuth/</a></p>
+</blockquote>
+<h3 id="译文">译文</h3><p>在本篇博客中，我们使用OAuth2.0创建一个安全的API来让外部访问到我们在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>和<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中创建的微服务。</p>
+<p>关于OAuth 2.0的更多资料，可以查阅资料<a href="http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified" target="_blank" rel="external">Parecki - OAuth 2 Simplified</a>和<a href="http://tutorials.jenkov.com/oauth2/index.html" target="_blank" rel="external">Jenkov - OAuth 2.0 Tutorial</a>或者规范 <a href="https://tools.ietf.org/html/rfc6749" target="_blank" rel="external">IETF RFC 6749</a>。</p>
+<p>我们会添加一个新的product-api的微服务，它会作为对外的API（OAuth术语中的Resource Server）并且被<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中介绍的edge server暴露出去。我们还会添加一个OAuth Authorization Server和OAuth client。我们还会用到cURL。</p>
+<p><a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中的系统架构图将会添加OAuth组件（红线标出的部分）：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/system-landscape.png" alt=""></p>
+<p>我们会示范客户端如何使用四个标准权限认证流程中的一个，从authorization sever来获取访问token然后通过一个安全的请求访问resource server。</p>
+<blockquote>
+<p>NOTES:</p>
+<p>   1.保护对外API并不是微服务特有的机制，所以本篇blog适用于任何需要使用OAuth2.0保护API的场景。</p>
+<p>   2.我们会提供一个轻量级的OAuth authorization server仅用来开发和测试。在生产环境下需要被API 平台或者第三方社交平台Facebook或者Twitter等替换掉。</p>
+<p>   3.我们在本篇博客中有意仅仅是用HTTP来简化复杂度。在任何真实场景下，所有OAuth的请求应该是用HTTPS。</p>
+<p>   4.我们强调过微服务和单体（monolithic）服务的区别在于每一个服务运行在一个独立的进程中。</p>
+</blockquote>
+<h4 id="BUILD_FROM_SOURCE">BUILD FROM SOURCE</h4><p>在<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中我们是用Java SE 8, Git和Gradle，执行如下命令来获取环境：</p>
+<pre><code>git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/callistaenterprise/blog-microservices.git
+<span class="keyword">cd</span> blog-microservices
+git checkout -<span class="keyword">b</span> B3 M3.<span class="number">1</span>
+./build-<span class="keyword">all</span>.<span class="keyword">sh</span>
+</code></pre><blockquote>
+<p>Windows环境下可以执行 build-all.bat</p>
+</blockquote>
+<p>与<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>相比，两个新的代码模块被加入进来,OAuth Authorization（auth-server） Server和OAuth Resource Server(product-api-service):<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/source-code.png" alt=""></p>
+<p>构建结果应返回十个如下内容：</p>
+<blockquote>
+<p>BUILD SUCCESSFUL</p>
+</blockquote>
+<h4 id="SOURCE_CODE_WALKTHROUGH">SOURCE CODE WALKTHROUGH</h4><p>我们来看下两个新的模块是如何实现的，edge server是如何更新来支持OAuth access token的。我们将会改变URL让使用更容易一些：</p>
+<h5 id="GRADLE_DEPENDENCIES">GRADLE DEPENDENCIES</h5><p>我们会使用开源项目<a href="http://cloud.spring.io/spring-cloud-security/" target="_blank" rel="external">spring-cloud-security</a>和<a href="http://projects.spring.io/spring-security-oauth/" target="_blank" rel="external">spring-security-oauth2</a>来实现OAuth2.0的功能。<br><strong>auth-server</strong>:</p>
+<blockquote>
+<p>   compile(“org.springframework.boot:spring-boot-starter-security”)<br>   compile(“org.springframework.security.oauth:spring-security-oauth2:2.0.6.RELEASE”)</p>
+</blockquote>
+<p>完整代码请看 <a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/auth-server/build.gradle" target="_blank" rel="external">auth-server/build.gradle</a></p>
+<p><strong>product-api-service</strong>:</p>
+<blockquote>
+<p>   compile(“org.springframework.cloud:spring-cloud-starter-security:1.0.0.RELEASE”)<br>   compile(“org.springframework.security.oauth:spring-security-oauth2:2.0.6.RELEASE”)</p>
+</blockquote>
+<p>完整代码请看 <a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/api/product-api-service/build.gradle" target="_blank" rel="external">product-api-service/build.gradle</a></p>
+<h5 id="AUTH-SERVER">AUTH-SERVER</h5><p>authorization server的实现是很简单直接的。仅用了@EnableAuthorizationServer注解，然后通过配置类中指定的 client-id, client-secret, allowed grant flows和scopes属性，注册（in-memory）审批通过客户端应用。</p>
+<pre><code><span class="annotation">@EnableAuthorizationServer</span>
+<span class="keyword">protected</span> static <span class="class"><span class="keyword">class</span> <span class="title">OAuth2Config</span> <span class="keyword"><span class="keyword">extends</span></span> <span class="title">AuthorizationServerConfigurerAdapter</span> {</span>
+
+    <span class="annotation">@Override</span>
+    public void configure(<span class="type">ClientDetailsServiceConfigurer</span> clients) <span class="keyword">throws</span> <span class="type">Exception</span> {
+        clients.inMemory()
+            .withClient(<span class="string">"acme"</span>)
+            .secret(<span class="string">"acmesecret"</span>)
+            .authorizedGrantTypes(<span class="string">"authorization_code"</span>, <span class="string">"refresh_token"</span>, <span class="string">"implicit"</span>, <span class="string">"password"</span>, <span class="string">"client_credentials"</span>)
+            .scopes(<span class="string">"webshop"</span>);
+    }
+}
+</code></pre><p>这个方式显然只在开发和测试场景下工作，目的是模拟一个real word的OAuth Authorization Server注册流程，如LinkedIn或Github。</p>
+<p>完整代码请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/auth-server/src/main/java/demo/AuthserverApplication.java" target="_blank" rel="external">AuthserverApplication.java</a></p>
+<p>模拟Identity Provider（IdP）的用户注册信息，是通过在application.properties中添加一行user配置来实现的，如：</p>
+<pre><code>security<span class="class">.user</span><span class="class">.password</span>=password
+</code></pre><p>完整代码请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/auth-server/src/main/resources/application.properties" target="_blank" rel="external">application.properties</a>。</p>
+<p>The implementation also comes with two simple web based user interfaces for user authentication and user consent, see the source code for details.<br>代码实现还包括两个简单的基于web的用户界面，来进行鉴权和授权，详细请见<a href="https://github.com/callistaenterprise/blog-microservices/tree/B3/microservices/support/auth-server/src/main/resources/templates" target="_blank" rel="external">source code</a>。</p>
+<h5 id="PRODUCT-API-SERVICE">PRODUCT-API-SERVICE</h5><p>让我们的API实现称为一个OAuth Resource Server，我们仅需在main方法加上 @EnableOAuth2Resource的注解：</p>
+<pre><code><span class="annotation">@EnableOAuth</span>2Resource
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProductApiServiceApplication</span> {</span>
+</code></pre><p>完整代码请见 <a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/api/product-api-service/src/main/java/se/callista/microservices/api/product/ProductApiServiceApplication.java" target="_blank" rel="external">ProductApiServiceApplication.java</a>.</p>
+<p>API-service的实现和<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>的composite service非常相似。为了验证OAuth是否工作，我们需要添加日志，来记录userid和access token：</p>
+<pre><code><span class="variable">@RequestMapping</span>(<span class="string">"/{productId}"</span>)
+<span class="variable">@HystrixCommand</span>(fallbackMethod = <span class="string">"defaultProductComposite"</span>)
+public ResponseEntity&lt;String&gt; <span class="function">getProductComposite</span>(
+    <span class="variable">@PathVariable</span> int productId,
+    <span class="variable">@RequestHeader</span>(value=<span class="string">"Authorization"</span>) String authorizationHeader,
+    Principal currentUser) {
+
+    <span class="tag">LOG</span><span class="class">.info</span>(<span class="string">"ProductApi: User={}, Auth={}, called with productId={}"</span>, 
+      currentUser.<span class="function">getName</span>(), <span class="tag">authorizationHeader</span>, <span class="tag">productId</span>);
+    ...   
+</code></pre><blockquote>
+<p>NOTES:<br>1 Spring MVC会把当前用户的额外的参数和authorization的header填好。</p>
+<p>2 我们从@RequestMapping中删掉了/product的uri来得到一个更紧凑的URL，当请求到达gateway，需要添加一个／product前缀才能路由到正确的服务去。</p>
+<p>3 从安全的角度讲，把访问token打印到日志中在生产环境是不被推荐的。</p>
+</blockquote>
+<h5 id="UPDATES_TO_THE_EDGE_SERVER">UPDATES TO THE EDGE SERVER</h5><p>来让URL更加紧凑，我们稍微修改了route的配置文件：</p>
+<pre><code><span class="attribute">zuul</span>:
+    <span class="attribute">ignoredServices</span>: <span class="string">"*"</span>
+    <span class="attribute">prefix</span>: /api
+    <span class="attribute">routes</span>:
+        <span class="attribute">productapi</span>: /product<span class="comment">/**</span>
+</code></pre><p>上面的配置文件让<a href="http://localhost:8765/api/product/123这样的URL可以被路由，而不是以前的" target="_blank" rel="external">http://localhost:8765/api/product/123这样的URL可以被路由，而不是以前的</a><br><a href="http://localhost:8765/productapi/product/123。" target="_blank" rel="external">http://localhost:8765/productapi/product/123。</a></p>
+<p>我们同样替换了composite-service的路由到api-service.<br>完整代码请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/edge-server/src/main/resources/application.yml" target="_blank" rel="external">application.yml</a>.</p>
+<h4 id="START_UP_THE_SYSTEM_LANDSCAPE">START UP THE SYSTEM LANDSCAPE</h4><blockquote>
+<p>如<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中，我们会把微服务作为一个java进程在本地开发环境启动，你需要安装cURL和jq这两个工具来执行如下命令：<br>首先启动RabbitMQ：</p>
+</blockquote>
+<pre><code>$ ~/Applications/rabbitmq_server-<span class="number">3.4</span><span class="number">.3</span>/sbin/rabbitmq-server
+</code></pre><blockquote>
+<p>如果是windows用户，请通过windows服务确认rabbitmq能够启动。</p>
+</blockquote>
+<p>然后启动基础服务：</p>
+<pre><code>$ <span class="built_in">cd</span> support/auth-server;       ./gradlew bootRun
+$ <span class="built_in">cd</span> support/discovery-server;  ./gradlew bootRun
+$ <span class="built_in">cd</span> support/edge-server;       ./gradlew bootRun
+$ <span class="built_in">cd</span> support/monitor-dashboard; ./gradlew bootRun
+$ <span class="built_in">cd</span> support/turbine;           ./gradlew bootRun
+</code></pre><p>最后启动业务服务：</p>
+<pre><code>$ <span class="built_in">cd</span> core/product-service;                ./gradlew bootRun
+$ <span class="built_in">cd</span> core/recommendation-service;         ./gradlew bootRun
+$ <span class="built_in">cd</span> core/review-service;                 ./gradlew bootRun
+$ <span class="built_in">cd</span> composite/product-composite-service; ./gradlew bootRun 
+$ <span class="built_in">cd</span> api/product-api-service;             ./gradlew bootRun
+</code></pre><blockquote>
+<p>如果是windows用户，可以执行start-all.bat</p>
+</blockquote>
+<p>当微服启动，并注册到service discover server后，将会打印如下日志：</p>
+<pre><code>DiscoveryClient ... - registration status: <span class="number">204</span>
+</code></pre><p>我们现在可以尝试获取access token，然后用它访问我们的secure API了。</p>
+<h4 id="TRYING_OUT_THE_FOUR_OAUTH_AUTHORIZATION_GRANT_FLOWS">TRYING OUT THE FOUR OAUTH AUTHORIZATION GRANT FLOWS</h4><p>OAuth 2.0规范定义了四种批准流程(grant flows)来获取access token：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/grant-flows.png" alt=""><br>详见<a href="http://tutorials.jenkov.com/oauth2/authorization.html" target="_blank" rel="external">Jenkov - OAuth 2.0 Authorization</a>。</p>
+<pre><code>NOTE: 批准流程（grant flow）中Authorization Code和<span class="type">Implicit</span>是最常用的，剩下两个可以被认为是前两个的边界情况（corner <span class="keyword">case</span>）。
+</code></pre><h5 id="AUTHORIZATION_CODE_GRANT">AUTHORIZATION CODE GRANT</h5><p>首先我们需要通过浏览器获取一个code grant（它像一个一次性密码）：</p>
+<pre><code>http://localhost:<span class="number">9999</span>/uaa/oauth/authorize?response_type=code&amp;client_id=acme&amp;redirect_uri=http://example.com&amp;scope=webshop&amp;<span class="keyword">state</span>=<span class="number">97536</span>
+</code></pre><p>登录（user/password）然后在网页中批准。浏览器重定向的URL如：</p>
+<pre><code>http://example.com/?
+code=IyJh4Y&amp;
+<span class="keyword">state</span>=<span class="number">97536</span>
+</code></pre><p>NOTE: request中的state参数应该被设置为一个随机数，并且在response中被检查，来防止跨站请求伪造。</p>
+<p>在重定向的URL中获取code参数，然后把它存在环境变量里：</p>
+<pre><code><span class="attribute">CODE</span>=<span class="string">IyJh4Y</span>
+</code></pre><p>现在作为安全服务器，用code来获取access token：</p>
+<pre><code>curl acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=authorization_code \
+ <span class="operator">-d</span> client_id=acme \
+ <span class="operator">-d</span> redirect_uri=http://example.com \
+ <span class="operator">-d</span> code=<span class="variable">$CODE</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"access_token"</span>: <span class="string">"eba6a974-3c33-48fb-9c2e-5978217ae727"</span>,
+  <span class="string">"token_type"</span>: <span class="string">"bearer"</span>,
+  <span class="string">"refresh_token"</span>: <span class="string">"0eebc878-145d-4df5-a1bc-69a7ef5a0bc3"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">43105</span>,
+  <span class="string">"scope"</span>: <span class="string">"webshop"</span>
+}
+</code></pre><p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=eba6a974-<span class="number">3</span>c33-<span class="number">48f</span>b-<span class="number">9</span>c2e-<span class="number">5978217</span>ae727
+</code></pre><p>让我们用同样的code在获取一次token，应该返回失败。code的真实作用是作为一次性密码：</p>
+<pre><code>curl acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=authorization_code \
+ <span class="operator">-d</span> client_id=acme \
+ <span class="operator">-d</span> redirect_uri=http://example.com \
+ <span class="operator">-d</span> code=<span class="variable">$CODE</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"error"</span>: <span class="string">"invalid_grant"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Invalid authorization code: IyJh4Y"</span>
+}
+</code></pre><h5 id="IMPLICIT_GRANT">IMPLICIT GRANT</h5><p>在implicit grant的方式下，我们跳过了code的验证，从浏览器直接请求acceess token（降低了安全性）。在浏览器使用如下URL：</p>
+<p><a href="http://localhost:9999/uaa/oauth/authorize?" target="_blank" rel="external">http://localhost:9999/uaa/oauth/authorize?</a><br>response_type=token&amp;<br>client_id=acme&amp;<br>redirect_uri=<a href="http://example.com&amp;" target="_blank" rel="external">http://example.com&amp;</a><br>scope=webshop&amp;<br>state=48532</p>
+<p>登录（user/password）然后在网页中批准。浏览器会重定向到类似如下URL：</p>
+<pre><code>http:<span class="comment">//example.com/#</span>
+  access_token=<span class="number">00</span>d182dc-<span class="number">9f</span>41-<span class="number">41</span>cd-b37e-<span class="number">59</span>de8f882703&amp;
+  token_type=bearer&amp;
+  state=<span class="number">48532</span>&amp;
+  expires_in=<span class="number">42704</span>
+</code></pre><p>NOTE: request中的state参数应该被设置为一个随机数，并且在response中被检查，来防止跨站请求伪造。</p>
+<p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=<span class="number">00</span>d182dc-<span class="number">9f</span>41-<span class="number">41</span>cd-b37e-<span class="number">59</span>de8f882703
+</code></pre><h5 id="RESOURCE_OWNER_PASSWORD_CREDENTIALS_GRANT">RESOURCE OWNER PASSWORD CREDENTIALS GRANT</h5><p>这种场景下用户通常不能访问浏览器，而是要把自己的密码交给客户端程序，来获取一个access token（从安全的角度看，如果你不能信任客户端程序，这不是一个很好的解决方案）：</p>
+<pre><code>curl <span class="operator">-s</span> acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token  \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=password \
+ <span class="operator">-d</span> client_id=acme \
+ <span class="operator">-d</span> scope=webshop \
+ <span class="operator">-d</span> username=user \
+ <span class="operator">-d</span> password=password | jq .
+{
+  <span class="string">"access_token"</span>: <span class="string">"62ca1eb0-b2a1-4f66-bcf4-2c0171bbb593"</span>,
+  <span class="string">"token_type"</span>: <span class="string">"bearer"</span>,
+  <span class="string">"refresh_token"</span>: <span class="string">"920fd8e6-1407-41cd-87ad-e7a07bd6337a"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">43173</span>,
+  <span class="string">"scope"</span>: <span class="string">"webshop"</span>
+}
+</code></pre><p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=<span class="number">62</span>ca1eb0-b2a1-<span class="number">4f</span>66-bcf4-<span class="number">2</span>c0171bbb593
+</code></pre><h5 id="CLIENT_CREDENTIALS_GRANT">CLIENT CREDENTIALS GRANT</h5><p>在最后一种情况里，我们假设不需要用户授权来访问API（通常是一些不设计隐私的API）。客户端程序在这种情况下可以自己向鉴权服务器获取访问token：</p>
+<pre><code>curl <span class="operator">-s</span> acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token  \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=client_credentials \
+ <span class="operator">-d</span> scope=webshop | jq .
+{
+  <span class="string">"access_token"</span>: <span class="string">"8265eee1-1309-4481-a734-24a2a4f19299"</span>,
+  <span class="string">"token_type"</span>: <span class="string">"bearer"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">43189</span>,
+  <span class="string">"scope"</span>: <span class="string">"webshop"</span>
+}
+</code></pre><p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=<span class="number">8265</span>eee1-<span class="number">1309</span>-<span class="number">4481</span>-a734-<span class="number">24</span>a2a4f19299
+</code></pre><blockquote>
+<p>请注意在这种情况下，access token代表的是客户端程序，而不是resource owner（用户），导致的问题是当product-api-service中 currentUser.getName()返回的将是acme而不是调用的用户。</p>
+</blockquote>
+<h4 id="ACCESSING_THE_API">ACCESSING THE API</h4><p>当我们得到access token以后，我们就可以开始访问真正的API了。</p>
+<p>首先尝试不用access token访问API，应该会失败：</p>
+<pre><code>curl <span class="string">'http://localhost:8765/api/product/123'</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"error"</span>: <span class="string">"unauthorized"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Full authentication is required to access this resource"</span>
+}
+</code></pre><p>很好，是我们预期的结果。</p>
+<p>然后，我们用一个不合法的token来访问，也应该会失败：</p>
+<pre><code>curl 'http:<span class="comment">//localhost:8765/api/product/123' \</span>
+ -H  <span class="string">"Authorization: Bearer invalid-access-token"</span> -s <span class="string">| jq .</span>
+{
+  <span class="string">"error"</span>: <span class="string">"access_denied"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Unable to obtain a new access token for resource 'null'. The provider manager is not configured to support it."</span>
+}
+</code></pre><p>我们又一次访问被拒绝。</p>
+<p>现在，让我们用前面获得的合法的access token来请求：</p>
+<pre><code><span class="atom">curl</span> <span class="string">'http://localhost:8765/api/product/123'</span> \
+ -<span class="name">H</span>  <span class="string">"Authorization: Bearer $TOKEN"</span> -<span class="atom">s</span> | <span class="atom">jq</span> .
+{
+  <span class="string">"productId"</span>: <span class="number">123</span>,
+  <span class="string">"name"</span>: <span class="string">"name"</span>,
+  <span class="string">"weight"</span>: <span class="number">123</span>,
+  <span class="string">"recommendations"</span>: [...],
+  <span class="string">"reviews"</span>: [... ]
+}
+</code></pre><p>很好，我们得到了预期的结果。</p>
+<p>来看api-service和product-api-service的日志打印：</p>
+<pre><code><span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">39</span>:<span class="number">59.014</span>  INFO <span class="number">79321</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">20</span>] o.s.c.s.o.r.UserInfoTokenServices        : Getting user info from: http:<span class="comment">//localhost:9999/uaa/user</span>
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">39</span>:<span class="number">59.030</span>  INFO <span class="number">79321</span> --- [ctApiService-<span class="number">10</span>] s.c.m.a.p.service.ProductApiService      : ProductApi: User=user, Auth=Bearer a0f91d9e-<span class="number">00</span>a6-<span class="number">4</span>b61-a59f-<span class="number">9</span>a084936e474, called with productId=<span class="number">123</span>
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">39</span>:<span class="number">59.381</span>  INFO <span class="number">79321</span> --- [ctApiService-<span class="number">10</span>] s.c.m.a.p.service.ProductApiService  
+</code></pre><p>我们可以发现，API向Authorization Server发送请求来获得用户的基本信息，然后打印在log中。</p>
+<p>最终，我们来尝试如何让token失效，如模拟token过期。一个可行的方式是重启auth-server（我们的demo仅把token信息存在内存中）然后重新请求：</p>
+<pre><code>curl <span class="string">'http://localhost:8765/api/product/123'</span> \
+ -H  <span class="string">"Authorization: Bearer <span class="variable">$TOKEN</span>"</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"error"</span>: <span class="string">"access_denied"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Unable to obtain a new access token for resource 'null'. The provider manager is not configured to support it."</span>
+}
+</code></pre><p>之前接受的access token如我们期望的，被拒绝了。</p>
+<h4 id="SUMMARY">SUMMARY</h4><p>开源项目spring-cloud-security和spring-security-auth让我们很容易的用OAuth 2.0搭建安全的API。不过要注意，例子中的Authorization Server智能用在开发和测试场景下。</p>
+<h4 id="NEXT_STEP">NEXT STEP</h4><p>Building Microservices系列博客的后续内容，我们会用Docker自动化搭建我们的环境，会使用ELK技术栈（Elasticsearch, LogStash和Kibana）的日志管理工具。<br>请继续关注。</p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/microservices/" rel="tag">#microservices</a>
+          
+            <a href="/tags/netflix-oss/" rel="tag">#netflix oss</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/09/Part 2：尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败/" rel="next">Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+            </div>
+
+            
+
+            
+              <div class="comments" id="comments">
+                
+              </div>
+            
+        </div>
+
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table Of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="/images/avatar.jpg" alt="doublelduob" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">doublelduob</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description"></p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">categories</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">tags</span>
+              
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#原文链接"><span class="nav-number">1.</span> <span class="nav-text">原文链接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#译文"><span class="nav-number">2.</span> <span class="nav-text">译文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#BUILD_FROM_SOURCE"><span class="nav-number">2.1.</span> <span class="nav-text">BUILD FROM SOURCE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOURCE_CODE_WALKTHROUGH"><span class="nav-number">2.2.</span> <span class="nav-text">SOURCE CODE WALKTHROUGH</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#GRADLE_DEPENDENCIES"><span class="nav-number">2.2.1.</span> <span class="nav-text">GRADLE DEPENDENCIES</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AUTH-SERVER"><span class="nav-number">2.2.2.</span> <span class="nav-text">AUTH-SERVER</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PRODUCT-API-SERVICE"><span class="nav-number">2.2.3.</span> <span class="nav-text">PRODUCT-API-SERVICE</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UPDATES_TO_THE_EDGE_SERVER"><span class="nav-number">2.2.4.</span> <span class="nav-text">UPDATES TO THE EDGE SERVER</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#START_UP_THE_SYSTEM_LANDSCAPE"><span class="nav-number">2.3.</span> <span class="nav-text">START UP THE SYSTEM LANDSCAPE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TRYING_OUT_THE_FOUR_OAUTH_AUTHORIZATION_GRANT_FLOWS"><span class="nav-number">2.4.</span> <span class="nav-text">TRYING OUT THE FOUR OAUTH AUTHORIZATION GRANT FLOWS</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#AUTHORIZATION_CODE_GRANT"><span class="nav-number">2.4.1.</span> <span class="nav-text">AUTHORIZATION CODE GRANT</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IMPLICIT_GRANT"><span class="nav-number">2.4.2.</span> <span class="nav-text">IMPLICIT GRANT</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RESOURCE_OWNER_PASSWORD_CREDENTIALS_GRANT"><span class="nav-number">2.4.3.</span> <span class="nav-text">RESOURCE OWNER PASSWORD CREDENTIALS GRANT</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CLIENT_CREDENTIALS_GRANT"><span class="nav-number">2.4.4.</span> <span class="nav-text">CLIENT CREDENTIALS GRANT</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ACCESSING_THE_API"><span class="nav-number">2.5.</span> <span class="nav-text">ACCESSING THE API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SUMMARY"><span class="nav-number">2.6.</span> <span class="nav-text">SUMMARY</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NEXT_STEP"><span class="nav-number">2.7.</span> <span class="nav-text">NEXT STEP</span></a></li></ol></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+    </main>
+
+    <footer id="footer" class="footer">
+        <div class="footer-inner">
+            <div class="copyright" >
+  
+  &copy; &nbsp; 
+  <span itemprop="copyrightYear">2015</span>
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doublelduob</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+        </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+</div>
+
+<script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+  
+    
+    
+
+  
+
+
+  
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.4"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.4"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js?v=0.4.4" id="motion.global"></script>
+
+
+
+  <script type="text/javascript" src="/js/search-toggle.js"></script>
+
+
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.4" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if (isDesktop() && CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    });
+  </script>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (CONFIG.sidebar === 'always') {
+            displaySidebar();
+        }
+    });
+</script>
+
+
+
+
+
+
+
+
+<!-- lazyload -->
+<script type="text/javascript" src="/js/lazyload.js"></script>
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery("#posts img").lazyload({
+            placeholder: "/images/loading.gif",
+            effect: "fadeIn"
+        });
+    });
+</script>
+</body>
+</html>

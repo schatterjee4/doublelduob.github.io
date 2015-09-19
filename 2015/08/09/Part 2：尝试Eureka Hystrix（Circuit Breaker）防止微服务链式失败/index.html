@@ -59,7 +59,7 @@ http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-closed-on-minor-error.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-open-on-major-error.png">
 <meta property="og:image" content="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-closed-again.png">
-<meta property="og:updated_time" content="2015-08-12T17:46:15.000Z">
+<meta property="og:updated_time" content="2015-09-19T06:48:22.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败">
 <meta name="twitter:description" content="原文链接
@@ -193,7 +193,7 @@ http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with
         <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中，我们使用了诸如 Eureka, Ribbon和Zuul等几个<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>的核心组件，用来实现我们的操作模型（operations model）使得独立部署的微服务之间可以互相通信。本片博客中，我们会关注微服务中的异常处理，使用Hystrix（Netflix的circuit breaker）来提升系统的还原能力。</p>
+<h3 id="译文">译文</h3><p>在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中，我们使用了诸如 Eureka, Ribbon和Zuul等几个<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>的核心组件，用来实现我们的操作模型（operations model）使得独立部署的微服务之间可以互相通信。本篇博客中，我们会关注微服务中的异常处理，使用Hystrix（Netflix的circuit breaker）来提升系统的还原能力。</p>
 <p>现在一些异常情况将会在我们<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中搭建的系统中出现。如一些复合服务依赖的核心服务会突然的不返回响应，如果不正确的处理，符合服务便会收到影响。</p>
 <p>通常我们把这类问题称为<strong>链式失败（chain of failures）</strong>，一个组件的异常会导致依赖它的其他组件一起发生异常。在基于微服务的系统中，这类问题需要额外注意。一个常见的解决方案是使用断路器模式（circuit breaker pattern），更多信息可以从<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a>这本书和<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">Fowler - Circuit Breaker</a>这篇博客中获得。一个断路器的状态转换如下：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-breaker.png" alt="circuit-breaker"><br>(Source: <a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a>)</p>
 <h4 id="SPRING_CLOUD_AND_NETFLIX_OSS">SPRING CLOUD AND NETFLIX OSS</h4><p>从<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中提到的表格中我们会用到：Hystrix，Hystrix dashboard和Turbine。<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/mapping-table.png" alt=""></p>
@@ -379,6 +379,8 @@ $ <span class="built_in">cd</span> composite/product-composite-service; ./gradle
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2015/09/19/Part-3-使用OAuth-2-0来让API更安全/" rel="prev">Part 3: 使用OAuth 2.0来让API更安全</a>
+            
           </div>
 
           <div class="post-nav-next post-nav-item">
@@ -446,7 +448,7 @@ $ <span class="built_in">cd</span> composite/product-composite-service; ./gradle
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>

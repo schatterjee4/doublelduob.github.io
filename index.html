@@ -144,6 +144,298 @@
           
           
             
+              <a class="post-title-link" href="/2015/09/19/Part-3-使用OAuth-2-0来让API更安全/" itemprop="url">
+                Part 3: 使用OAuth 2.0来让API更安全
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on
+          <time itemprop="dateCreated" datetime="2015-09-19T14:49:48+08:00" content="2015-09-19">
+            2015-09-19
+          </time>
+        </span>
+
+        
+
+        
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
+<p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&#39;s%20with%20OAuth/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/27/building-microservices-part-3,%20secure%20API&#39;s%20with%20OAuth/</a></p>
+</blockquote>
+<h3 id="译文">译文</h3><p>在本篇博客中，我们使用OAuth2.0创建一个安全的API来让外部访问到我们在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>和<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中创建的微服务。</p>
+<p>关于OAuth 2.0的更多资料，可以查阅资料<a href="http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified" target="_blank" rel="external">Parecki - OAuth 2 Simplified</a>和<a href="http://tutorials.jenkov.com/oauth2/index.html" target="_blank" rel="external">Jenkov - OAuth 2.0 Tutorial</a>或者规范 <a href="https://tools.ietf.org/html/rfc6749" target="_blank" rel="external">IETF RFC 6749</a>。</p>
+<p>我们会添加一个新的product-api的微服务，它会作为对外的API（OAuth术语中的Resource Server）并且被<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中介绍的edge server暴露出去。我们还会添加一个OAuth Authorization Server和OAuth client。我们还会用到cURL。</p>
+<p><a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中的系统架构图将会添加OAuth组件（红线标出的部分）：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/system-landscape.png" alt=""></p>
+<p>我们会示范客户端如何使用四个标准权限认证流程中的一个，从authorization sever来获取访问token然后通过一个安全的请求访问resource server。</p>
+<blockquote>
+<p>NOTES:</p>
+<p>   1.保护对外API并不是微服务特有的机制，所以本篇blog适用于任何需要使用OAuth2.0保护API的场景。</p>
+<p>   2.我们会提供一个轻量级的OAuth authorization server仅用来开发和测试。在生产环境下需要被API 平台或者第三方社交平台Facebook或者Twitter等替换掉。</p>
+<p>   3.我们在本篇博客中有意仅仅是用HTTP来简化复杂度。在任何真实场景下，所有OAuth的请求应该是用HTTPS。</p>
+<p>   4.我们强调过微服务和单体（monolithic）服务的区别在于每一个服务运行在一个独立的进程中。</p>
+</blockquote>
+<h4 id="BUILD_FROM_SOURCE">BUILD FROM SOURCE</h4><p>在<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中我们是用Java SE 8, Git和Gradle，执行如下命令来获取环境：</p>
+<pre><code>git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/callistaenterprise/blog-microservices.git
+<span class="keyword">cd</span> blog-microservices
+git checkout -<span class="keyword">b</span> B3 M3.<span class="number">1</span>
+./build-<span class="keyword">all</span>.<span class="keyword">sh</span>
+</code></pre><blockquote>
+<p>Windows环境下可以执行 build-all.bat</p>
+</blockquote>
+<p>与<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>相比，两个新的代码模块被加入进来,OAuth Authorization（auth-server） Server和OAuth Resource Server(product-api-service):<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/source-code.png" alt=""></p>
+<p>构建结果应返回十个如下内容：</p>
+<blockquote>
+<p>BUILD SUCCESSFUL</p>
+</blockquote>
+<h4 id="SOURCE_CODE_WALKTHROUGH">SOURCE CODE WALKTHROUGH</h4><p>我们来看下两个新的模块是如何实现的，edge server是如何更新来支持OAuth access token的。我们将会改变URL让使用更容易一些：</p>
+<h5 id="GRADLE_DEPENDENCIES">GRADLE DEPENDENCIES</h5><p>我们会使用开源项目<a href="http://cloud.spring.io/spring-cloud-security/" target="_blank" rel="external">spring-cloud-security</a>和<a href="http://projects.spring.io/spring-security-oauth/" target="_blank" rel="external">spring-security-oauth2</a>来实现OAuth2.0的功能。<br><strong>auth-server</strong>:</p>
+<blockquote>
+<p>   compile(“org.springframework.boot:spring-boot-starter-security”)<br>   compile(“org.springframework.security.oauth:spring-security-oauth2:2.0.6.RELEASE”)</p>
+</blockquote>
+<p>完整代码请看 <a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/auth-server/build.gradle" target="_blank" rel="external">auth-server/build.gradle</a></p>
+<p><strong>product-api-service</strong>:</p>
+<blockquote>
+<p>   compile(“org.springframework.cloud:spring-cloud-starter-security:1.0.0.RELEASE”)<br>   compile(“org.springframework.security.oauth:spring-security-oauth2:2.0.6.RELEASE”)</p>
+</blockquote>
+<p>完整代码请看 <a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/api/product-api-service/build.gradle" target="_blank" rel="external">product-api-service/build.gradle</a></p>
+<h5 id="AUTH-SERVER">AUTH-SERVER</h5><p>authorization server的实现是很简单直接的。仅用了@EnableAuthorizationServer注解，然后通过配置类中指定的 client-id, client-secret, allowed grant flows和scopes属性，注册（in-memory）审批通过客户端应用。</p>
+<pre><code><span class="annotation">@EnableAuthorizationServer</span>
+<span class="keyword">protected</span> static <span class="class"><span class="keyword">class</span> <span class="title">OAuth2Config</span> <span class="keyword"><span class="keyword">extends</span></span> <span class="title">AuthorizationServerConfigurerAdapter</span> {</span>
+
+    <span class="annotation">@Override</span>
+    public void configure(<span class="type">ClientDetailsServiceConfigurer</span> clients) <span class="keyword">throws</span> <span class="type">Exception</span> {
+        clients.inMemory()
+            .withClient(<span class="string">"acme"</span>)
+            .secret(<span class="string">"acmesecret"</span>)
+            .authorizedGrantTypes(<span class="string">"authorization_code"</span>, <span class="string">"refresh_token"</span>, <span class="string">"implicit"</span>, <span class="string">"password"</span>, <span class="string">"client_credentials"</span>)
+            .scopes(<span class="string">"webshop"</span>);
+    }
+}
+</code></pre><p>这个方式显然只在开发和测试场景下工作，目的是模拟一个real word的OAuth Authorization Server注册流程，如LinkedIn或Github。</p>
+<p>完整代码请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/auth-server/src/main/java/demo/AuthserverApplication.java" target="_blank" rel="external">AuthserverApplication.java</a></p>
+<p>模拟Identity Provider（IdP）的用户注册信息，是通过在application.properties中添加一行user配置来实现的，如：</p>
+<pre><code>security<span class="class">.user</span><span class="class">.password</span>=password
+</code></pre><p>完整代码请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/auth-server/src/main/resources/application.properties" target="_blank" rel="external">application.properties</a>。</p>
+<p>The implementation also comes with two simple web based user interfaces for user authentication and user consent, see the source code for details.<br>代码实现还包括两个简单的基于web的用户界面，来进行鉴权和授权，详细请见<a href="https://github.com/callistaenterprise/blog-microservices/tree/B3/microservices/support/auth-server/src/main/resources/templates" target="_blank" rel="external">source code</a>。</p>
+<h5 id="PRODUCT-API-SERVICE">PRODUCT-API-SERVICE</h5><p>让我们的API实现称为一个OAuth Resource Server，我们仅需在main方法加上 @EnableOAuth2Resource的注解：</p>
+<pre><code><span class="annotation">@EnableOAuth</span>2Resource
+<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProductApiServiceApplication</span> {</span>
+</code></pre><p>完整代码请见 <a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/api/product-api-service/src/main/java/se/callista/microservices/api/product/ProductApiServiceApplication.java" target="_blank" rel="external">ProductApiServiceApplication.java</a>.</p>
+<p>API-service的实现和<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>的composite service非常相似。为了验证OAuth是否工作，我们需要添加日志，来记录userid和access token：</p>
+<pre><code><span class="variable">@RequestMapping</span>(<span class="string">"/{productId}"</span>)
+<span class="variable">@HystrixCommand</span>(fallbackMethod = <span class="string">"defaultProductComposite"</span>)
+public ResponseEntity&lt;String&gt; <span class="function">getProductComposite</span>(
+    <span class="variable">@PathVariable</span> int productId,
+    <span class="variable">@RequestHeader</span>(value=<span class="string">"Authorization"</span>) String authorizationHeader,
+    Principal currentUser) {
+
+    <span class="tag">LOG</span><span class="class">.info</span>(<span class="string">"ProductApi: User={}, Auth={}, called with productId={}"</span>, 
+      currentUser.<span class="function">getName</span>(), <span class="tag">authorizationHeader</span>, <span class="tag">productId</span>);
+    ...   
+</code></pre><blockquote>
+<p>NOTES:<br>1 Spring MVC会把当前用户的额外的参数和authorization的header填好。</p>
+<p>2 我们从@RequestMapping中删掉了/product的uri来得到一个更紧凑的URL，当请求到达gateway，需要添加一个／product前缀才能路由到正确的服务去。</p>
+<p>3 从安全的角度讲，把访问token打印到日志中在生产环境是不被推荐的。</p>
+</blockquote>
+<h5 id="UPDATES_TO_THE_EDGE_SERVER">UPDATES TO THE EDGE SERVER</h5><p>来让URL更加紧凑，我们稍微修改了route的配置文件：</p>
+<pre><code><span class="attribute">zuul</span>:
+    <span class="attribute">ignoredServices</span>: <span class="string">"*"</span>
+    <span class="attribute">prefix</span>: /api
+    <span class="attribute">routes</span>:
+        <span class="attribute">productapi</span>: /product<span class="comment">/**</span>
+</code></pre><p>上面的配置文件让<a href="http://localhost:8765/api/product/123这样的URL可以被路由，而不是以前的" target="_blank" rel="external">http://localhost:8765/api/product/123这样的URL可以被路由，而不是以前的</a><br><a href="http://localhost:8765/productapi/product/123。" target="_blank" rel="external">http://localhost:8765/productapi/product/123。</a></p>
+<p>我们同样替换了composite-service的路由到api-service.<br>完整代码请看<a href="https://github.com/callistaenterprise/blog-microservices/blob/B3/microservices/support/edge-server/src/main/resources/application.yml" target="_blank" rel="external">application.yml</a>.</p>
+<h4 id="START_UP_THE_SYSTEM_LANDSCAPE">START UP THE SYSTEM LANDSCAPE</h4><blockquote>
+<p>如<a href="/2015/08/09/Part%202：尝试Eureka%20Hystrix（Circuit%20Breaker）防止微服务链式失败/">Part 2</a>中，我们会把微服务作为一个java进程在本地开发环境启动，你需要安装cURL和jq这两个工具来执行如下命令：<br>首先启动RabbitMQ：</p>
+</blockquote>
+<pre><code>$ ~/Applications/rabbitmq_server-<span class="number">3.4</span><span class="number">.3</span>/sbin/rabbitmq-server
+</code></pre><blockquote>
+<p>如果是windows用户，请通过windows服务确认rabbitmq能够启动。</p>
+</blockquote>
+<p>然后启动基础服务：</p>
+<pre><code>$ <span class="built_in">cd</span> support/auth-server;       ./gradlew bootRun
+$ <span class="built_in">cd</span> support/discovery-server;  ./gradlew bootRun
+$ <span class="built_in">cd</span> support/edge-server;       ./gradlew bootRun
+$ <span class="built_in">cd</span> support/monitor-dashboard; ./gradlew bootRun
+$ <span class="built_in">cd</span> support/turbine;           ./gradlew bootRun
+</code></pre><p>最后启动业务服务：</p>
+<pre><code>$ <span class="built_in">cd</span> core/product-service;                ./gradlew bootRun
+$ <span class="built_in">cd</span> core/recommendation-service;         ./gradlew bootRun
+$ <span class="built_in">cd</span> core/review-service;                 ./gradlew bootRun
+$ <span class="built_in">cd</span> composite/product-composite-service; ./gradlew bootRun 
+$ <span class="built_in">cd</span> api/product-api-service;             ./gradlew bootRun
+</code></pre><blockquote>
+<p>如果是windows用户，可以执行start-all.bat</p>
+</blockquote>
+<p>当微服启动，并注册到service discover server后，将会打印如下日志：</p>
+<pre><code>DiscoveryClient ... - registration status: <span class="number">204</span>
+</code></pre><p>我们现在可以尝试获取access token，然后用它访问我们的secure API了。</p>
+<h4 id="TRYING_OUT_THE_FOUR_OAUTH_AUTHORIZATION_GRANT_FLOWS">TRYING OUT THE FOUR OAUTH AUTHORIZATION GRANT FLOWS</h4><p>OAuth 2.0规范定义了四种批准流程(grant flows)来获取access token：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-3/grant-flows.png" alt=""><br>详见<a href="http://tutorials.jenkov.com/oauth2/authorization.html" target="_blank" rel="external">Jenkov - OAuth 2.0 Authorization</a>。</p>
+<pre><code>NOTE: 批准流程（grant flow）中Authorization Code和<span class="type">Implicit</span>是最常用的，剩下两个可以被认为是前两个的边界情况（corner <span class="keyword">case</span>）。
+</code></pre><h5 id="AUTHORIZATION_CODE_GRANT">AUTHORIZATION CODE GRANT</h5><p>首先我们需要通过浏览器获取一个code grant（它像一个一次性密码）：</p>
+<pre><code>http://localhost:<span class="number">9999</span>/uaa/oauth/authorize?response_type=code&amp;client_id=acme&amp;redirect_uri=http://example.com&amp;scope=webshop&amp;<span class="keyword">state</span>=<span class="number">97536</span>
+</code></pre><p>登录（user/password）然后在网页中批准。浏览器重定向的URL如：</p>
+<pre><code>http://example.com/?
+code=IyJh4Y&amp;
+<span class="keyword">state</span>=<span class="number">97536</span>
+</code></pre><p>NOTE: request中的state参数应该被设置为一个随机数，并且在response中被检查，来防止跨站请求伪造。</p>
+<p>在重定向的URL中获取code参数，然后把它存在环境变量里：</p>
+<pre><code><span class="attribute">CODE</span>=<span class="string">IyJh4Y</span>
+</code></pre><p>现在作为安全服务器，用code来获取access token：</p>
+<pre><code>curl acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=authorization_code \
+ <span class="operator">-d</span> client_id=acme \
+ <span class="operator">-d</span> redirect_uri=http://example.com \
+ <span class="operator">-d</span> code=<span class="variable">$CODE</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"access_token"</span>: <span class="string">"eba6a974-3c33-48fb-9c2e-5978217ae727"</span>,
+  <span class="string">"token_type"</span>: <span class="string">"bearer"</span>,
+  <span class="string">"refresh_token"</span>: <span class="string">"0eebc878-145d-4df5-a1bc-69a7ef5a0bc3"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">43105</span>,
+  <span class="string">"scope"</span>: <span class="string">"webshop"</span>
+}
+</code></pre><p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=eba6a974-<span class="number">3</span>c33-<span class="number">48f</span>b-<span class="number">9</span>c2e-<span class="number">5978217</span>ae727
+</code></pre><p>让我们用同样的code在获取一次token，应该返回失败。code的真实作用是作为一次性密码：</p>
+<pre><code>curl acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=authorization_code \
+ <span class="operator">-d</span> client_id=acme \
+ <span class="operator">-d</span> redirect_uri=http://example.com \
+ <span class="operator">-d</span> code=<span class="variable">$CODE</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"error"</span>: <span class="string">"invalid_grant"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Invalid authorization code: IyJh4Y"</span>
+}
+</code></pre><h5 id="IMPLICIT_GRANT">IMPLICIT GRANT</h5><p>在implicit grant的方式下，我们跳过了code的验证，从浏览器直接请求acceess token（降低了安全性）。在浏览器使用如下URL：</p>
+<p><a href="http://localhost:9999/uaa/oauth/authorize?" target="_blank" rel="external">http://localhost:9999/uaa/oauth/authorize?</a><br>response_type=token&amp;<br>client_id=acme&amp;<br>redirect_uri=<a href="http://example.com&amp;" target="_blank" rel="external">http://example.com&amp;</a><br>scope=webshop&amp;<br>state=48532</p>
+<p>登录（user/password）然后在网页中批准。浏览器会重定向到类似如下URL：</p>
+<pre><code>http:<span class="comment">//example.com/#</span>
+  access_token=<span class="number">00</span>d182dc-<span class="number">9f</span>41-<span class="number">41</span>cd-b37e-<span class="number">59</span>de8f882703&amp;
+  token_type=bearer&amp;
+  state=<span class="number">48532</span>&amp;
+  expires_in=<span class="number">42704</span>
+</code></pre><p>NOTE: request中的state参数应该被设置为一个随机数，并且在response中被检查，来防止跨站请求伪造。</p>
+<p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=<span class="number">00</span>d182dc-<span class="number">9f</span>41-<span class="number">41</span>cd-b37e-<span class="number">59</span>de8f882703
+</code></pre><h5 id="RESOURCE_OWNER_PASSWORD_CREDENTIALS_GRANT">RESOURCE OWNER PASSWORD CREDENTIALS GRANT</h5><p>这种场景下用户通常不能访问浏览器，而是要把自己的密码交给客户端程序，来获取一个access token（从安全的角度看，如果你不能信任客户端程序，这不是一个很好的解决方案）：</p>
+<pre><code>curl <span class="operator">-s</span> acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token  \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=password \
+ <span class="operator">-d</span> client_id=acme \
+ <span class="operator">-d</span> scope=webshop \
+ <span class="operator">-d</span> username=user \
+ <span class="operator">-d</span> password=password | jq .
+{
+  <span class="string">"access_token"</span>: <span class="string">"62ca1eb0-b2a1-4f66-bcf4-2c0171bbb593"</span>,
+  <span class="string">"token_type"</span>: <span class="string">"bearer"</span>,
+  <span class="string">"refresh_token"</span>: <span class="string">"920fd8e6-1407-41cd-87ad-e7a07bd6337a"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">43173</span>,
+  <span class="string">"scope"</span>: <span class="string">"webshop"</span>
+}
+</code></pre><p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=<span class="number">62</span>ca1eb0-b2a1-<span class="number">4f</span>66-bcf4-<span class="number">2</span>c0171bbb593
+</code></pre><h5 id="CLIENT_CREDENTIALS_GRANT">CLIENT CREDENTIALS GRANT</h5><p>在最后一种情况里，我们假设不需要用户授权来访问API（通常是一些不设计隐私的API）。客户端程序在这种情况下可以自己向鉴权服务器获取访问token：</p>
+<pre><code>curl <span class="operator">-s</span> acme:acmesecret@localhost:<span class="number">9999</span>/uaa/oauth/token  \
+ <span class="operator">-d</span> grant_<span class="built_in">type</span>=client_credentials \
+ <span class="operator">-d</span> scope=webshop | jq .
+{
+  <span class="string">"access_token"</span>: <span class="string">"8265eee1-1309-4481-a734-24a2a4f19299"</span>,
+  <span class="string">"token_type"</span>: <span class="string">"bearer"</span>,
+  <span class="string">"expires_in"</span>: <span class="number">43189</span>,
+  <span class="string">"scope"</span>: <span class="string">"webshop"</span>
+}
+</code></pre><p>把access token存入环境变量，后面访问API时使用：</p>
+<pre><code>TOKEN=<span class="number">8265</span>eee1-<span class="number">1309</span>-<span class="number">4481</span>-a734-<span class="number">24</span>a2a4f19299
+</code></pre><blockquote>
+<p>请注意在这种情况下，access token代表的是客户端程序，而不是resource owner（用户），导致的问题是当product-api-service中 currentUser.getName()返回的将是acme而不是调用的用户。</p>
+</blockquote>
+<h4 id="ACCESSING_THE_API">ACCESSING THE API</h4><p>当我们得到access token以后，我们就可以开始访问真正的API了。</p>
+<p>首先尝试不用access token访问API，应该会失败：</p>
+<pre><code>curl <span class="string">'http://localhost:8765/api/product/123'</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"error"</span>: <span class="string">"unauthorized"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Full authentication is required to access this resource"</span>
+}
+</code></pre><p>很好，是我们预期的结果。</p>
+<p>然后，我们用一个不合法的token来访问，也应该会失败：</p>
+<pre><code>curl 'http:<span class="comment">//localhost:8765/api/product/123' \</span>
+ -H  <span class="string">"Authorization: Bearer invalid-access-token"</span> -s <span class="string">| jq .</span>
+{
+  <span class="string">"error"</span>: <span class="string">"access_denied"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Unable to obtain a new access token for resource 'null'. The provider manager is not configured to support it."</span>
+}
+</code></pre><p>我们又一次访问被拒绝。</p>
+<p>现在，让我们用前面获得的合法的access token来请求：</p>
+<pre><code><span class="atom">curl</span> <span class="string">'http://localhost:8765/api/product/123'</span> \
+ -<span class="name">H</span>  <span class="string">"Authorization: Bearer $TOKEN"</span> -<span class="atom">s</span> | <span class="atom">jq</span> .
+{
+  <span class="string">"productId"</span>: <span class="number">123</span>,
+  <span class="string">"name"</span>: <span class="string">"name"</span>,
+  <span class="string">"weight"</span>: <span class="number">123</span>,
+  <span class="string">"recommendations"</span>: [...],
+  <span class="string">"reviews"</span>: [... ]
+}
+</code></pre><p>很好，我们得到了预期的结果。</p>
+<p>来看api-service和product-api-service的日志打印：</p>
+<pre><code><span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">39</span>:<span class="number">59.014</span>  INFO <span class="number">79321</span> --- [ XNIO-<span class="number">2</span> task-<span class="number">20</span>] o.s.c.s.o.r.UserInfoTokenServices        : Getting user info from: http:<span class="comment">//localhost:9999/uaa/user</span>
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">39</span>:<span class="number">59.030</span>  INFO <span class="number">79321</span> --- [ctApiService-<span class="number">10</span>] s.c.m.a.p.service.ProductApiService      : ProductApi: User=user, Auth=Bearer a0f91d9e-<span class="number">00</span>a6-<span class="number">4</span>b61-a59f-<span class="number">9</span>a084936e474, called with productId=<span class="number">123</span>
+<span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">18</span>:<span class="number">39</span>:<span class="number">59.381</span>  INFO <span class="number">79321</span> --- [ctApiService-<span class="number">10</span>] s.c.m.a.p.service.ProductApiService  
+</code></pre><p>我们可以发现，API向Authorization Server发送请求来获得用户的基本信息，然后打印在log中。</p>
+<p>最终，我们来尝试如何让token失效，如模拟token过期。一个可行的方式是重启auth-server（我们的demo仅把token信息存在内存中）然后重新请求：</p>
+<pre><code>curl <span class="string">'http://localhost:8765/api/product/123'</span> \
+ -H  <span class="string">"Authorization: Bearer <span class="variable">$TOKEN</span>"</span> <span class="operator">-s</span> | jq .
+{
+  <span class="string">"error"</span>: <span class="string">"access_denied"</span>,
+  <span class="string">"error_description"</span>: <span class="string">"Unable to obtain a new access token for resource 'null'. The provider manager is not configured to support it."</span>
+}
+</code></pre><p>之前接受的access token如我们期望的，被拒绝了。</p>
+<h4 id="SUMMARY">SUMMARY</h4><p>开源项目spring-cloud-security和spring-security-auth让我们很容易的用OAuth 2.0搭建安全的API。不过要注意，例子中的Authorization Server智能用在开发和测试场景下。</p>
+<h4 id="NEXT_STEP">NEXT STEP</h4><p>Building Microservices系列博客的后续内容，我们会用Docker自动化搭建我们的环境，会使用ELK技术栈（Elasticsearch, LogStash和Kibana）的日志管理工具。<br>请继续关注。</p>
+</span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
               <a class="post-title-link" href="/2015/08/09/Part 2：尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败/" itemprop="url">
                 Part 2: 尝试Eureka Hystrix（Circuit Breaker）防止微服务链式失败
               </a>
@@ -178,7 +470,7 @@
           <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
 <p><a href="http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/</a></p>
 </blockquote>
-<h3 id="译文">译文</h3><p>在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中，我们使用了诸如 Eureka, Ribbon和Zuul等几个<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>的核心组件，用来实现我们的操作模型（operations model）使得独立部署的微服务之间可以互相通信。本片博客中，我们会关注微服务中的异常处理，使用Hystrix（Netflix的circuit breaker）来提升系统的还原能力。</p>
+<h3 id="译文">译文</h3><p>在<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中，我们使用了诸如 Eureka, Ribbon和Zuul等几个<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>和<a href="http://projects.spring.io/spring-cloud/" target="_blank" rel="external">Spring Cloud</a>的核心组件，用来实现我们的操作模型（operations model）使得独立部署的微服务之间可以互相通信。本篇博客中，我们会关注微服务中的异常处理，使用Hystrix（Netflix的circuit breaker）来提升系统的还原能力。</p>
 <p>现在一些异常情况将会在我们<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中搭建的系统中出现。如一些复合服务依赖的核心服务会突然的不返回响应，如果不正确的处理，符合服务便会收到影响。</p>
 <p>通常我们把这类问题称为<strong>链式失败（chain of failures）</strong>，一个组件的异常会导致依赖它的其他组件一起发生异常。在基于微服务的系统中，这类问题需要额外注意。一个常见的解决方案是使用断路器模式（circuit breaker pattern），更多信息可以从<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a>这本书和<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">Fowler - Circuit Breaker</a>这篇博客中获得。一个断路器的状态转换如下：<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-2/circuit-breaker.png" alt="circuit-breaker"><br>(Source: <a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a>)</p>
 <h4 id="SPRING_CLOUD_AND_NETFLIX_OSS">SPRING CLOUD AND NETFLIX OSS</h4><p>从<a href="/2015/07/29/Part-1-使用-Netflix-Eureka-Ribbon-和-Zuul构建微服务/">Part 1</a>中提到的表格中我们会用到：Hystrix，Hystrix dashboard和Turbine。<br><img src="http://callistaenterprise.se/assets/blogg/build-microservices-part-1/mapping-table.png" alt=""></p>
@@ -607,172 +899,6 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
 
 
     
-      
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              <a class="post-title-link" href="/2015/07/27/Part-0-介绍：微服务的operations-model/" itemprop="url">
-                Part 0 介绍：微服务的operations model
-              </a>
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          Posted on
-          <time itemprop="dateCreated" datetime="2015-07-27T07:18:16+08:00" content="2015-07-27">
-            2015-07-27
-          </time>
-        </span>
-
-        
-
-        
-          
-        
-      </div>
-    </header>
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <span itemprop="articleBody"><h3 id="原文链接">原文链接</h3><blockquote>
-<p><a href="http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/" target="_blank" rel="external">http://callistaenterprise.se/blogg/teknik/2015/03/25/an-operations-model-for-microservices/</a></p>
-</blockquote>
-<h3 id="译文">译文</h3><p>这篇博客不是微服务的介绍，这有一个很好的介绍<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">Fowler - Microservices</a>给有需要的读者。博客中假定我们已经开始使用微服务来分解整块庞大（monolithic）的应用服务，用来提升可部署性（deployability）和扩展性（scalability）。</p>
-<p>一个分布式系统中部署的微服务数量不断增加时与整块庞大（monothilic）服务的数量不断增加相比，新挑战的出现不会非常明显（译者注：因为微服务架构设计时照顾了水平扩展的需求）。这篇博客将会聚焦在这些大量微服务情况下出现的新挑战上，并会给大量微服务定义一个operations model。</p>
-<p>这篇博客分为如下几个部分：</p>
-<ul>
-<li>Prerequisites 先决条件</li>
-<li>Scaling up 水平扩展</li>
-<li>Questions 遇到的问题</li>
-<li>Required components 必须的组件</li>
-<li>A reference model 一个参考模型</li>
-<li>Next step</li>
-</ul>
-<h4 id="Prerequisites先决条件">Prerequisites先决条件</h4><p>首先，我们来想一个问题，想要系统地运行（roll out）大量的微服务我们都需要些什么？<br>（原文：what is required to roll out large numbers of microservices in the system landscape?）</p>
-<p>参考Fowler的博客，这就是我们的目标：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1.png" alt=""><br>(图片来自: <a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">http://martinfowler.com/articles/microservices.html</a>)</p>
-<p>在我们的系统中用大量微服务来替代整块庞大的服务之前，我们还需要一些必要条件：</p>
-<ul>
-<li>a target architecture 目标系统架构</li>
-<li>a continues delivery tool chain 持续部署工具链</li>
-<li>a proper organization 合适的组织架构</li>
-</ul>
-<p>我们来简要看下各个部分：</p>
-<h5 id="A_TARGET_ARCHITECTURE_目标系统架构">A TARGET ARCHITECTURE 目标系统架构</h5><p>首先我们需要从架构的角度考虑如何拆分我们的微服务。<br>比如我们可以把服务垂直拆分为多个层：</p>
-<ul>
-<li>Core services 核心服务<br>处理业务数据（business data）的持久化，应用业务规则和其他逻辑</li>
-<li>Composite services 组合服务<br>组合服务不但可以协同多个核心服务来完成一些通用任务（common task），还可以从多个核心服务来整合（aggregating）信息。</li>
-<li>API services API服务<br>给外部暴露接口，比如把底层功能以接口形式暴露给上层或第三方，让他们基于此做一些有创造性的应用</li>
-</ul>
-<p>水平的看，我们也可以采用领域切分的方式。</p>
-<p>这样我们的目标系统架构会是：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-architecture.png" alt="sample target architecture"><br>注意：这只是个参考的目标系统架构，你的架构可能会和这个完全不同。关键点在于你需要建立一个目标系统架构才能开始考虑如何水平扩展（scale up）你的微服务。否则你的系统最终可能像一大碗意大利面，并且很多特性还不如现有的整块庞大（monolithic）的应用服务。</p>
-<h5 id="CONTINUOUS_DELIVERY_持续部署">CONTINUOUS DELIVERY 持续部署</h5><p>我们还假定已经有了一定程度上的持续部署工具链，这样我们就能高效可重复且高质量地驱动微服务的运行。参考图：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-2.png" alt="continues delivery"><br>(图片来源: <a href="http://www.infoq.com/minibooks/emag-devops-toolchain" target="_blank" rel="external">http://www.infoq.com/minibooks/emag-devops-toolchain</a>)</p>
-<h5 id="ORGANIZATION_组织架构">ORGANIZATION 组织架构</h5><p>最终，我们还假定我们采用了合适的组织架构来避免<a href="http://www.melconway.com/Home/Conways_Law.html" target="_blank" rel="external">Conway’s law</a>中提到的一些问题。Conway’s law称：</p>
-<blockquote>
-<p>设计系统的组织，最终产生的设计等同于组织之内、之间的沟通结构。</p>
-</blockquote>
-<p><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-1-1.png" alt="conway&#39;s law"><br>(Source: <a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="external">http://martinfowler.com/articles/microservices.html</a>)</p>
-<h4 id="Scaling_up">Scaling up</h4><p>那么现在我们来看scale在这篇博客中会关注的地方：</p>
-<blockquote>
-<p>当我们开始把整个庞大（monolithic）的应用服务拆分并替换为大量的微服务，会发现什么特点？</p>
-</blockquote>
-<ul>
-<li><p><strong><em> 1.大量的部署单元（deployed units）</em></strong><br>许多小的微服务相比大的完整的服务会导致大量的部署单元，需要我们去管理和监控</p>
-</li>
-<li><p><strong><em> 2.各个微服务既是服务提供方也是服务调用方</em></strong><br>这会导致系统中的各个微服务将会互相交互</p>
-</li>
-<li><p><strong><em> 3.一些服务对外暴露API</em></strong><br>这些微服务将会负责把其他微服务包裹起来，作为对外访问的接口</p>
-</li>
-<li><p><strong><em> 4.整个系统将会更加的灵活（dynamic）</em></strong><br>新的微服务被部署，老的服务被替换或删除，系统中负载增大时我们可以增加微服务中对应的实例来解决问题。这意味着与之前相比服务会以更高的频率启停。</p>
-</li>
-<li><p><strong><em> 5.比如平均故障间隔（MTBF）将会被降低，故障在整个系统的角度将会更频繁的发生。</em></strong><br>软件组件（components）时而会失败。随着大量小的部署单元的变多，整个系统中部分（或者非常小的部分）会失败的可能性相比整个庞大的服务应用相比会增加。</p>
-</li>
-</ul>
-<h4 id="Questions">Questions</h4><p>这将会导致一些重要的问题，有些情况会关系到运行时的问题：</p>
-<ul>
-<li><p><strong><em>所有的微服务是如何配置的，它们配置的正确吗？</em></strong><br>当应用数量不多的时候管理配置并不是一个很难的问题。每个应用把自己的配置存在property文件中放在磁盘上，或者放在数据库的配置表中。当大量的微服务被部署到多个实例且运行在多个服务器的时候，这种方式变的非常难以控制。这会导致很多小的配置遍布到系统的各个部分，让整个系统想要高效高质量的维护变的很难。</p>
-</li>
-<li><p><strong><em>什么样的微服务需要被部署，部署在哪里？</em></strong><br>追踪服务在哪台机器哪个端口对外开放在数量不多的时候是一个成本很低的操作。当大量的微服务独立部署之后，并且每个微服务本身还会持续变更，这时如果还用人工维护的话，那会是一个噩梦。</p>
-</li>
-<li><p><strong><em>如何维护最新的路由信息？</em></strong><br>在一个动态变化的系统中作服务的调用方也会面对很多挑战。特别是当我们需要手工更新路由表，并且路由表在反向代理中或者在调用者的配置文件中时。根本上说，当我们在一个持续演化的系统中，系统的新的微服务随时会在新的机器或端口创建的时候，根本没有时间来让我们手动操作路由表。手工维护的交付时间相比之下就太慢了，因为变化次数的上升，手工操作出错的风险也会相比自动化配置有不必要的提高。</p>
-</li>
-<li><p><strong><em>如何防止链式失败？（chain of failures）</em></strong><br>当微服务之间相互调用时，我们就需要对链式失败进行额外的关注。如果一个被很多服务依赖的底层服务出问题了，会导致上层服务也出问题。如果不及时处理，大量服务会被一个出问题的服务拖累，导致我们的系统过于脆弱。</p>
-</li>
-<li><p><strong><em>如何保证所有服务都启动并且正常运行？</em></strong><br>追踪不多的应用很容易，我们如何保证大量的微服务时，服务的健康性呢？</p>
-</li>
-<li><p><strong><em>如何追踪在系统之间流转的信息？</em></strong><br>如果运营部门开始收到一些用户的抱怨，说我们的一些流程开始不正常了。<br>哪个微服务才是错误的根源？<br>我们如何能够找到那个出问题的流程？比如说订单号为12345的流程卡住，原因是微服务A不能访问，或者手动审批需要在微服务B之前才能发送确认消息。</p>
-</li>
-<li><p><strong><em>如何才能确保只有API-services暴露给外部？</em></strong><br>比如我们如何避免外界未授权的请求访问我们的内部？</p>
-</li>
-<li><p><strong><em>如何保证API－services的安全？</em></strong><br>这并不是关于微服务一个新的或者是特别的问题，但是当对外时，安全却是一个非常重要的问题。</p>
-</li>
-</ul>
-<h4 id="Required_components_必要组件">Required components 必要组件</h4><p>来给上述问题寻找答案，我们需要很多系统级别的新操作和管理的功能，但是当只操作少数应用服务时，这些功能其实是不太需要的。针对上述问题推荐的解决方案需要如下的组建：</p>
-<ul>
-<li><p><strong><em>Central Configuration server 中央配置服务器</em></strong><br>我们需要一个中央配置管理服务，而不是每个部署单元（如一个微服务）都靠一个本地的配置文件。我们同样需要配置的API来让微服务获取配置信息。</p>
-</li>
-<li><p><strong><em>Service Discovery server 服务发现服务器</em></strong><br>我们需要一个服务发现的功能来让我们通过API使得微服务可以自主的在启动时注册服务，而不是手工的管理追踪服务被部署在哪个机器的哪个端口。</p>
-</li>
-<li><p><strong><em>Dynamic Routing and Load Balancer 动态路由和负载均衡</em></strong><br>路由组件在配合服务发现功能后可以使用服务发现API来查询需要的服务被部署在哪里，并且负载均衡组件可以决定多个实例中的哪一个实例来响应请求。</p>
-</li>
-<li><p><strong><em>Circuit Breaker 断路器</em></strong><br>To avoid the chain of failures problem we need to apply the Circuit Breaker pattern, for details see the book Release It! or read the blog post Fowler - Circuit Breaker.<br>来避免链式失败问题，我们需要应用断路器模式，预知详情，请看<a href="https://pragprog.com/book/mnee/release-it" target="_blank" rel="external">Release It!</a> 或者看这篇博客<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="external">Fowler - Circuit Breaker</a>。</p>
-</li>
-<li><p><strong><em>Monitoring 监控</em></strong><br>在断路器的配合下，我们可以监控断路器的状态，同时收集运行时信息来获得一个系统级别的健康的图谱。<br>这些信息可以在dashboard上收集和展示，并设置阈值自动报警。</p>
-</li>
-<li><p><strong><em>Centralized log analysis 集中式的日志处理</em></strong><br>当服务卡住的时候，为了有能力追踪和发现问题，我们需要一个集中式的日志处理功能，它能访问到服务器并且收集每个微服务产生的日志文件。日志收集功能把把日志储存在一个中央日志系统，来提供搜索和展示的能力。<br>注意：为了有能力找到相护关联的信息，所有微服务之间在log中使用一个相关的id是非常重要的。</p>
-</li>
-<li><p><strong><em>Edge Server 边界服务器</em></strong><br>为了给外部暴露API服务并且防止未授权的请求访问内部服务，我们需要一个边界服务器，所有的外部访问都经过它们进入系统。边界服务器可以在上述服务发现组件的功能上复用动态路由和负载均衡的能力。边界服务器将会扮演一个动态和主动的反向代理，并且在内部系统发生变化的时候不需要手工更新。</p>
-</li>
-<li><p><strong><em>OAuth 2.0 protected API’s 在OAuth 2.0保护下的API</em></strong><br>对于防护对外的API服务，推荐使用<a href="http://oauth.net/" target="_blank" rel="external">OAuth 2.0</a>标准。<br>使用OAuth 2.0的我们需要：</p>
-<ul>
-<li>一个新的组件作为OAuth鉴权服务器</li>
-<li>API服务会作为OAuth的资源服务器（OAuth Resource Server）</li>
-<li>外部的API调用作为OAuth的客户（OAuth Clients）</li>
-<li>边界服务器会作为OAuth的Token Relay意味着：<ul>
-<li>它会作为OAuth的资源服务器（OAuth Resource Server）</li>
-<li>它会让OAuth访问从外部通过，然后访问内部API服务。</li>
-</ul>
-</li>
-</ul>
-<p>注意：随着时间的推移，OAuth 2.0标准很有可能会被<a href="http://openid.net/connect/" target="_blank" rel="external">OpenID Connect</a>标准完全替代，来提供更好的鉴权功能。</p>
-</li>
-</ul>
-<h4 id="A_reference_model_参考模型">A reference model 参考模型</h4><p>综合上述，微服务需要的基础架构需要上面提到的一些服务来支撑微服务相护的API调用。这些可以如下图来举例：<br><img src="http://callistaenterprise.se/assets/blogg/an-operations-model-for-microservices/microservices-operations-reference-model.png" alt="reference model"></p>
-<p>注意：为了简化复杂度，微服务之间的调用，支撑服务的交互都没有在图中展示。</p>
-<h4 id="Next_step">Next step</h4><p>在随后的博客中，我们会描述和演示推荐的参考模型如何来实现，请关注系列博客－<a href="/2015/07/26/Building-Microservices%E7%B3%BB%E5%88%97%E5%8D%9A%E5%AE%A2/">Building Microservices</a>。</p>
-<h3 id="译者注">译者注</h3></span>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -812,7 +938,7 @@ $ curl -s localhost:<span class="number">48014</span>/recommendation?productId=<
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">posts</span>
             </a>
           </div>
